@@ -4,42 +4,41 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 450;
 
-// 重力与跳跃物理常量
+// 物理常量
 const float GRAVITY = 1500.0f;     // 重力加速度
-const float JUMP_FORCE = -600.0f;  // 跳跃初始速度（向上为负）
+const float JUMP_FORCE = -600.0f;  // 跳跃初始速度
 const float MOVE_SPEED = 300.0f;  // 左右移动速度
 
 int main() {
-    // 1. 初始化窗口和音频（准备工作）
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dash Delivery - Prototype Phase 1");
+    // 初始化窗口
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dash Delivery - Camera & Bounds Control");
     SetTargetFPS(60);
 
-    // 2. 初始化外卖员状态 (红点)
+    // 初始化外卖员状态 (红点)
     Vector2 playerPos = { 100.0f, 300.0f };
     Vector2 playerVelocity = { 0.0f, 0.0f };
     bool isGrounded = false;
     float playerRadius = 15.0f;
 
-    // 3. 定义地面高度
+    // 地面高度
     float groundY = 350.0f;
 
-    // 4. 初始化背景滚动变量 (Yue 的基础视差工作)
-    float backBgScroll = 0.0f;  // 远景滚动速度
-    float foreBgScroll = 0.0f;  // 近景滚动速度
+    // 屏幕 1/3 处的锚点坐标
+    const float CAMERA_TRIGGER_X = SCREEN_WIDTH / 3.0f; 
+
+    // 视差滚动核心变量 (代表世界滚动的总距离)
+    float worldScrollOffset = 0.0f; 
 
     // 主游戏循环
     while (!WindowShouldClose()) {
-        // --- 帧率/时间增量 ---
         float deltaTime = GetFrameTime();
 
-        // --- 玩家输入与物理更新 (Mingda 的任务范围) ---
-        
-        // 左右移动控制
+        // ----------------- 1. 玩家输入控制 -----------------
         playerVelocity.x = 0.0f;
         if (IsKeyDown(KEY_LEFT))  playerVelocity.x = -MOVE_SPEED;
         if (IsKeyDown(KEY_RIGHT)) playerVelocity.x = MOVE_SPEED;
 
-        // 跳跃控制（只有在地面上时才能跳）
+        // 跳跃控制
         if (IsKeyPressed(KEY_SPACE) && isGrounded) {
             playerVelocity.y = JUMP_FORCE;
             isGrounded = false;
@@ -52,46 +51,66 @@ int main() {
             playerVelocity.y = 0.0f;
         }
 
-        // 更新玩家位置
-        playerPos.x += playerVelocity.x * deltaTime;
-        playerPos.y += playerVelocity.y * deltaTime;
+        // ----------------- 2. 核心逻辑：屏幕锁定与滚动控制 -----------------
+        
+        // 预估本帧如果单纯移动，玩家会在什么位置
+        float nextPlayerX = playerPos.x + playerVelocity.x * deltaTime;
 
-        // 地面碰撞检测 (简单的 Y 轴边界检查)
+        // 条件判断：
+        // 1. 玩家正在往右走 (playerVelocity.x > 0)
+        // 2. 玩家即将或者已经到达了屏幕左侧的 1/3 锚点 (nextPlayerX >= CAMERA_TRIGGER_X)
+        if (playerVelocity.x > 0 && nextPlayerX >= CAMERA_TRIGGER_X) {
+            // 【满足条件】外卖员被固定在左 1/3 处不前移
+            playerPos.x = CAMERA_TRIGGER_X;
+            
+            // 地图和背景开始向左滚动（worldScrollOffset 增加）
+            worldScrollOffset += playerVelocity.x * deltaTime;
+        } 
+        else {
+            // 【不满足条件】（即：往左走、原地跳跃、或者在开局还未走到 1/3 处时）
+            // 外卖员自己在画框里走，地图和背景绝对不倒退 (worldScrollOffset 保持不变)
+            playerPos.x = nextPlayerX;
+        }
+
+        // 垂直方向位置更新与地面碰撞
+        playerPos.y += playerVelocity.y * deltaTime;
         if (playerPos.y + playerRadius >= groundY) {
             playerPos.y = groundY - playerRadius;
             isGrounded = true;
         }
 
-        // 防止玩家走出屏幕左边界
+        // ----------------- 3. 画框边缘限制 (玩家活动范围控制) -----------------
+        // 无论何时，限制外卖员不能走出屏幕左边缘
         if (playerPos.x - playerRadius < 0) {
             playerPos.x = playerRadius;
         }
-
-        // --- 背景视差滚动更新 (Yue 的任务范围) ---
-        // 只有当玩家在移动时，背景才会向反方向滚动，制造移动错觉
-        if (playerVelocity.x != 0) {
-            backBgScroll -= playerVelocity.x * 0.1f * deltaTime;  // 远景动得慢
-            foreBgScroll -= playerVelocity.x * 0.5f * deltaTime;  // 近景动得快
+        // 限制外卖员不能走出屏幕右边缘
+        if (playerPos.x + playerRadius > SCREEN_WIDTH) {
+            playerPos.x = SCREEN_WIDTH - playerRadius;
         }
 
-        // 循环背景坐标，防止数值无限变大
-        if (backBgScroll <= -SCREEN_WIDTH) backBgScroll = 0;
-        if (backBgScroll >= SCREEN_WIDTH)  backBgScroll = 0;
-        if (foreBgScroll <= -SCREEN_WIDTH) foreBgScroll = 0;
-        if (foreBgScroll >= SCREEN_WIDTH)  foreBgScroll = 0;
+
+        // ----------------- 4. 计算视察背景滚动坐标 -----------------
+        // 利用取模运算 (%) 让背景无缝循环。
+        // 远景速度系数 0.1，近景速度系数 0.5。由于 worldScrollOffset 会一直增加，这里加负号让其向左退。
+        float backBgScroll = -(worldScrollOffset * 0.1f);
+        backBgScroll = (float)((int)backBgScroll % SCREEN_WIDTH);
+
+        float foreBgScroll = -(worldScrollOffset * 0.5f);
+        foreBgScroll = (float)((int)foreBgScroll % SCREEN_WIDTH);
 
 
-        // --- 渲染部分 ---
+        // ----------------- 5. 渲染部分 -----------------
         BeginDrawing();
-        ClearBackground(DARKGRAY); // 深色天空背景
+        ClearBackground(DARKGRAY); 
 
-        // A. 绘制远景 (例如: 远处的微弱方块群，代表高楼)
+        // A. 绘制远景 (随玩家右行而向左慢速滚动)
         DrawRectangle(backBgScroll, 100, 200, 150, GRAY);
         DrawRectangle(backBgScroll + SCREEN_WIDTH, 100, 200, 150, GRAY);
         DrawRectangle(backBgScroll + 400, 120, 250, 130, GRAY);
         DrawRectangle(backBgScroll + 400 + SCREEN_WIDTH, 120, 250, 130, GRAY);
 
-        // B. 绘制近景 (例如: 稍近一些的简单线条或小障碍，动得较快)
+        // B. 绘制近景 (随玩家右行而向左快速滚动)
         DrawCircle(foreBgScroll + 150, 280, 40, DARKGREEN);
         DrawCircle(foreBgScroll + 150 + SCREEN_WIDTH, 280, 40, DARKGREEN);
         DrawCircle(foreBgScroll + 600, 290, 30, DARKGREEN);
@@ -103,14 +122,15 @@ int main() {
         // D. 绘制外卖员 (小红点)
         DrawCircleV(playerPos, playerRadius, RED);
 
-        // E. 界面文字提示
-        DrawText("Dash Delivery Prototype", 10, 10, 20, MAROON);
-        DrawText("Controls: Left/Right Arrow to Move | Space to Jump", 10, 40, 16, LIGHTGRAY);
+        // E. 调试与界面信息展示
+        DrawText("Dash Delivery - Stage 1 Target Achieved", 10, 10, 20, MAROON);
+        DrawText(TextFormat("Player Screen X: %.1f | World Distance: %.1f", playerPos.x, worldScrollOffset), 10, 40, 16, LIGHTGRAY);
+        // 绘制一条淡淡的辅助线，标出 1/3 锁定区的位置，方便你们写作业验证
+        DrawLine(CAMERA_TRIGGER_X, 0, CAMERA_TRIGGER_X, groundY, LIGHTGRAY);
 
         EndDrawing();
     }
 
-    // 清理关闭窗口
     CloseWindow();
     return 0;
 }
