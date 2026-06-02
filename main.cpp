@@ -20,11 +20,11 @@ int main() {
     // =================================================================
     // 1. 【新增】加载外卖员图片
     // =================================================================
-    Texture2D playerTexture = LoadTexture("assets/runner.png");
+    Texture2D playerTexture = LoadTexture("assets/player.png");
 
     // 你可以根据小人图片在屏幕上的实际视觉比例，任意调整这两个长宽数值
-    float spriteWidth = 50.0f;
-    float spriteHeight = 60.0f;
+    float spriteWidth = 80.0f;
+    float spriteHeight = 80.0f;
 
     // 用来记录小人当前的左右朝向（1.0f 代表朝右，-1.0f 代表朝左）
     float playerFacing = 1.0f;
@@ -50,14 +50,14 @@ int main() {
     float backY = groundY - backHeight; // 让远景的底部刚好贴在地面上
 
     // 自定义一个 70% 明度的滤镜颜色 (R:178, G:178, B:178 是 255 的 70%)
-    Color backTint = { 165, 165, 165, 255 };
+    Color backTint = { 200, 200, 200, 100 };
 
     // -----------------------------------------------------------------
     // 1. 近景图（2851 x 1271）尺寸与缩放核心计算
     // -----------------------------------------------------------------
 
     // 要求高度为画面的 1/4
-    float foreHeight = SCREEN_HEIGHT / 1.5f;
+    float foreHeight = SCREEN_HEIGHT / 1.3f;
 
     // 根据高度计算缩放比例，保持原有宽高比不缩放变形
     float foreScale = foreHeight / (float)foreTexture.height; 
@@ -67,6 +67,8 @@ int main() {
 
     // 让近景图的底部刚好踩在地面（groundY）上
     float foreY = groundY - foreHeight;
+
+    Color foreTint = { 255, 255, 255, 255 };
 
     // 屏幕 1/3 处的锚点坐标
     const float CAMERA_TRIGGER_X = SCREEN_WIDTH / 3.0f; 
@@ -163,7 +165,7 @@ int main() {
         // 因为图片缩放后变窄了，我们需要连续画几张来接力。
         // 从 foreBgScroll 开始，每隔一幅图的宽度画一次，直到画出屏幕右边界
         for (float xOffset = foreBgScroll; xOffset < SCREEN_WIDTH; xOffset += foreRenderWidth) {
-            DrawTextureEx(foreTexture, (Vector2){ xOffset, foreY }, 0.0f, foreScale, WHITE);
+            DrawTextureEx(foreTexture, (Vector2){ xOffset, foreY }, 0.0f, foreScale, foreTint);
         }
         // =================================================================
 
