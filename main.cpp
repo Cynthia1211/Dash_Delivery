@@ -24,7 +24,7 @@ int main() {
 
     // 你可以根据小人图片在屏幕上的实际视觉比例，任意调整这两个长宽数值
     float spriteWidth = 80.0f;
-    float spriteHeight = 80.0f;
+    float spriteHeight = 96.0f;
 
     // 用来记录小人当前的左右朝向（1.0f 代表朝右，-1.0f 代表朝左）
     float playerFacing = 1.0f;
