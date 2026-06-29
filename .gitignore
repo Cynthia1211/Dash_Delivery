@@ -1,2 +1,3 @@
 # 忽略编译出的 game 文件
 game
+.DS_Store
