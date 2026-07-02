@@ -1,5 +1,5 @@
 # Dash_Delivery
-Course Project of PROG33921 Game Engineering Principles
+Course Project of Game Engineering Principles
 
 ## Building from Source
 ### macOS (Intel)
