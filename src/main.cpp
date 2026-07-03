@@ -17,8 +17,18 @@ int main() {
     Player player;
     player.texture = LoadTexture("../assets/player.png");
 
+    // 在 main 函数内部的初始化部分添加：
+    int currentStage = 1; // 记录当前是第几关
+
+    // 定义游戏状态：0 = 游戏中，1 = 关卡间过渡（显示过关提示），2 = 游戏最终通关
+    int gameState = 0; 
+
+    // 记录过渡画面的计时器（比如让过关提示显示 3 秒钟）
+    float stageTransitionTimer = 0.0f;
+
     LevelManager level(SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_Y);
     level.LoadAssets();
+    level.SetupLevel(currentStage);
 
     const float CAMERA_TRIGGER_X = SCREEN_WIDTH / 3.0f; 
     float worldScrollOffset = 0.0f; 
@@ -26,38 +36,86 @@ int main() {
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
-        // 1. 玩家输入控制与物理更新
-        player.HandleInput(MOVE_SPEED, JUMP_FORCE);
-        player.UpdatePhysics(deltaTime, GRAVITY, GROUND_Y);
+        // =================================================================
+        // 【核心逻辑控制】根据 gameState 分流
+        // =================================================================
+        if (gameState == 0) {
+            // ----- 状态 0：正常游戏中 -----
+            
+            // 1. 玩家输入控制与物理更新
+            player.HandleInput(MOVE_SPEED, JUMP_FORCE);
+            player.UpdatePhysics(deltaTime, GRAVITY, GROUND_Y);
 
-        // 2. 核心逻辑：屏幕锁定与滚动控制
-        float nextPlayerX = player.pos.x + player.velocity.x * deltaTime;
+            // 2. 屏幕锁定与滚动控制
+            float nextPlayerX = player.pos.x + player.velocity.x * deltaTime;
+            if (player.velocity.x > 0 && nextPlayerX >= CAMERA_TRIGGER_X) {
+                player.pos.x = CAMERA_TRIGGER_X;
+                worldScrollOffset += player.velocity.x * deltaTime;
+            } else {
+                player.pos.x = nextPlayerX;
+            }
 
-        if (player.velocity.x > 0 && nextPlayerX >= CAMERA_TRIGGER_X) {
-            player.pos.x = CAMERA_TRIGGER_X;
-            worldScrollOffset += player.velocity.x * deltaTime;
+            // 3. 边缘限制
+            if (player.pos.x - player.radius < 0) player.pos.x = player.radius;
+            if (player.pos.x + player.radius > SCREEN_WIDTH) player.pos.x = SCREEN_WIDTH - player.radius;
+
+            // 4. 【新增】检查是否触碰终点线
+            if (level.CheckWin(worldScrollOffset)) {
+                if (currentStage < 3) {
+                    // 如果还没到第 3 关，进入关卡过渡状态
+                    gameState = 1; 
+                    stageTransitionTimer = 3.0f; // 提示显示 3 秒
+                } else {
+                    // 如果已经是第 3 关，说明全剧终，直接通关
+                    gameState = 2;
+                }
+            }
         } 
-        else {
-            player.pos.x = nextPlayerX;
+        else if (gameState == 1) {
+            // ----- 状态 1：关卡过渡中（自动倒计时切换） -----
+            stageTransitionTimer -= deltaTime;
+            
+            if (stageTransitionTimer <= 0.0f) {
+                // 3秒倒计时结束，自动切入下一关！
+                currentStage++;
+                worldScrollOffset = 0.0f;        // 核心：重置地图滚动距离
+                player.pos = { 100.0f, 300.0f };  // 核心：让小人回到起点
+                player.velocity = { 0.0f, 0.0f }; // 速度清零
+                
+                level.SetupLevel(currentStage);   // 核心：一键加载新关卡的数据（速度、天气、障碍物）
+                gameState = 0;                    // 切回正常游戏状态
+            }
         }
 
-        // 3. 屏幕画框左右边缘限制
-        if (player.pos.x - player.radius < 0)              player.pos.x = player.radius;
-        if (player.pos.x + player.radius > SCREEN_WIDTH)   player.pos.x = SCREEN_WIDTH - player.radius;
-
-        // 4. 渲染阶段
+        // =================================================================
+        // 5. 渲染部分
+        // =================================================================
         BeginDrawing();
         ClearBackground(SKYBLUE); 
 
-        // 调用模块绘制背景与地面
+        // 无论什么状态，都先把背景、地面和小人画出来
         level.Draw(worldScrollOffset);
-
-        // 调用模块绘制玩家
         player.Draw();
 
-        // 界面调试文字与辅助线
-        DrawText("Dash Delivery - Stage 1 Target Achieved", 10, 10, 20, MAROON);
-        DrawText(TextFormat("Player Screen X: %.1f | World Distance: %.1f", player.pos.x, worldScrollOffset), 10, 40, 16, LIGHTGRAY);
+        // 根据不同状态，在屏幕最上层盖上不同的文字提示 UI（张月负责的部分）
+        if (gameState == 0) {
+            // 游戏正常进行时显示当前的关卡数
+            DrawText(TextFormat("STAGE %d", currentStage), 10, 10, 20, MAROON);
+            DrawText(TextFormat("Player Screen X: %.1f | World Distance: %.1f", player.pos.x, worldScrollOffset), 10, 40, 16, LIGHTGRAY);
+        } 
+        else if (gameState == 1) {
+            // 关卡通过，等待自动开启下一关的黑色半透明遮罩
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 150 });
+            DrawText(TextFormat("STAGE %d CLEAR!", currentStage), 260, 180, 40, GREEN);
+            DrawText(TextFormat("Next Stage starts in %.1f seconds...", stageTransitionTimer), 240, 240, 20, WHITE);
+        } 
+        else if (gameState == 2) {
+            // 最终大通关
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 200 });
+            DrawText("CONGRATULATIONS!", 180, 160, 40, GOLD);
+            DrawText("You Delivered All Orders On Time!", 200, 220, 20, WHITE);
+        }
+
         DrawLine(CAMERA_TRIGGER_X, 0, CAMERA_TRIGGER_X, GROUND_Y, LIGHTGRAY);
 
         EndDrawing();

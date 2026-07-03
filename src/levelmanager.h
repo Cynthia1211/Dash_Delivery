@@ -1,5 +1,30 @@
 #pragma once
 #include "raylib.h"
+#include <vector>
+
+
+// 1. 定义天气类型
+enum class WeatherType { SUNNY, RAIN, WINDY, NIGHT };
+
+// 2. 定义障碍物与道具的数据结构
+struct LevelObject {
+    float worldX;     // 世界绝对坐标 X
+    float width;      // 宽度
+    float height;     // 高度（如果是道具，可以代表它离地面的高度）
+    int type;         // 0: 普通障碍方块, 1: 旱冰鞋, 2: 无人机, 3: 流氓, 4: 恶猫
+    Color color;      // 临时测试颜色
+};
+
+// 3. 核心：关卡配置结构体
+struct LevelConfig {
+    int levelNumber;          // 关卡编号（1, 2, 3）
+    float maxDistance;        // 关卡总长度（快递送达的终点线）
+    float backScrollSpeed;    // 远景滚动系数（例如第一关 0.1，后面越来越快）
+    float foreScrollSpeed;    // 近景滚动系数（例如第一关 0.5）
+    WeatherType weather;      // 当前关卡的天气
+    std::vector<LevelObject> objects; // 当前关卡的所有障碍物和道具列表
+};
+
 
 class LevelManager {
 public:
@@ -22,6 +47,9 @@ public:
     float foreY;
     Color foreTint;
 
+    // 【新增】当前正在运行的关卡数据
+    LevelConfig currentLevel;
+
     // 构造函数
     LevelManager(int sWidth, int sHeight, float gY);
     
@@ -31,6 +59,8 @@ public:
     // 卸载外部背景素材
     void UnloadAssets();
     
-    // 绘制无缝平铺的视差背景和地面
+    // 用 switch-case 实现的核心函数
+    void SetupLevel(int levelNumber);
     void Draw(float worldScrollOffset);
+    bool CheckWin(float worldScrollOffset);
 };
