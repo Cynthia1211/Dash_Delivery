@@ -106,6 +106,7 @@ void LevelManager::Draw(float worldScrollOffset) {
     for (float xOffset = foreBgScroll; xOffset < screenWidth; xOffset += foreRenderWidth) {
         DrawTextureEx(foreTexture, (Vector2){ xOffset, foreY }, 0.0f, foreScale, foreTint);
     }
+
     DrawRectangle(0, groundY, screenWidth, screenHeight - groundY, GRAY);
 
     // 根据天气渲染全局环境特效
@@ -126,7 +127,10 @@ void LevelManager::Draw(float worldScrollOffset) {
     for (const auto& obj : currentLevel.objects) {
         float screenX = obj.worldX - worldScrollOffset;
         if (screenX + obj.width > 0 && screenX < screenWidth) {
-            float screenY = groundY - obj.height;
+
+            // 1. 声明与 Player 相同的视觉透视偏移量
+            float perspectiveOffsetY = 40.0f;
+            float screenY = groundY - obj.height + perspectiveOffsetY;;
             DrawRectangle(screenX, screenY, obj.width, obj.height, obj.color);
             
             if (obj.type == 1) DrawText("SKATES", screenX, screenY - 15, 10, GOLD);

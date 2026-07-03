@@ -46,12 +46,29 @@ int main() {
             player.HandleInput(MOVE_SPEED, JUMP_FORCE);
             player.UpdatePhysics(deltaTime, GRAVITY, GROUND_Y);
 
-            // 2. 屏幕锁定与滚动控制
+            // =================================================================
+            // 2. 屏幕锁定与滚动控制（完美修复版）
+            // =================================================================
             float nextPlayerX = player.pos.x + player.velocity.x * deltaTime;
-            if (player.velocity.x > 0 && nextPlayerX >= CAMERA_TRIGGER_X) {
+
+            // 1. 计算地图能滚动的最大极限（终点线刚好贴在屏幕最右侧）
+            float maxScrollLimit = level.currentLevel.maxDistance - SCREEN_WIDTH;
+
+            // 2. 只有当地图还没滚到头，且玩家超过 1/3 触发线时，画面才滚动
+            if (player.velocity.x > 0 && nextPlayerX >= CAMERA_TRIGGER_X && worldScrollOffset < maxScrollLimit) {
+                
+                // 让小人固定在屏幕 1/3 处
                 player.pos.x = CAMERA_TRIGGER_X;
+                
+                // 画面正常滚动
                 worldScrollOffset += player.velocity.x * deltaTime;
+                
+                // 【核心用处】如果这帧滚过头了，强制把它拉回到最大限制，卡死画面
+                if (worldScrollOffset > maxScrollLimit) {
+                    worldScrollOffset = maxScrollLimit;
+                }
             } else {
+                // 画面不动了，小人自己在屏幕里往右走（或者往左退）
                 player.pos.x = nextPlayerX;
             }
 
@@ -59,8 +76,9 @@ int main() {
             if (player.pos.x - player.radius < 0) player.pos.x = player.radius;
             if (player.pos.x + player.radius > SCREEN_WIDTH) player.pos.x = SCREEN_WIDTH - player.radius;
 
-            // 4. 【新增】检查是否触碰终点线
-            if (level.CheckWin(worldScrollOffset)) {
+            // 4. 检查是否触碰终点线（完美修复：小人亲脚踩到终点线才算过关）
+            float playerWorldX = worldScrollOffset + player.pos.x; // 计算小人在世界中的绝对 X 坐标
+            if (playerWorldX + player.radius >= level.currentLevel.maxDistance) {
                 if (currentStage < 3) {
                     // 如果还没到第 3 关，进入关卡过渡状态
                     gameState = 1; 
