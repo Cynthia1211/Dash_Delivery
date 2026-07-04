@@ -9,12 +9,6 @@ LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
     backTint = { 200, 200, 200, 100 };
     foreTint = { 255, 255, 255, 255 };
     
-    // backScale = 0.0f;
-    // backRenderWidth = 0.0f;
-    // backY = 0.0f;
-    // foreScale = 0.0f;
-    // foreRenderWidth = 0.0f;
-    // foreY = 0.0f;
 }
 
 void LevelManager::LoadAssets() {

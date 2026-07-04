@@ -97,8 +97,11 @@ int main() {
                 // 3秒倒计时结束，自动切入下一关！
                 currentStage++;
                 worldScrollOffset = 0.0f;        // 核心：重置地图滚动距离
-                player.pos = { 100.0f, 300.0f };  // 核心：让小人回到起点
+
+                player.pos.x = 100.0f;
+                player.pos.y = GROUND_Y - player.radius;
                 player.velocity = { 0.0f, 0.0f }; // 速度清零
+                player.isGrounded = true;
                 
                 level.SetupLevel(currentStage);   // 核心：一键加载新关卡的数据（速度、天气、障碍物）
                 gameState = 0;                    // 切回正常游戏状态
