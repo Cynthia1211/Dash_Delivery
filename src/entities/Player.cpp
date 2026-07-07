@@ -12,8 +12,22 @@ Player::Player() {
     facing = 1.0f; // 1.0f 代表朝右，-1.0f 代表朝左
 }
 
+void Player::UpdateTimers(float deltaTime) {
+    if (skatesTimer > 0) skatesTimer -= deltaTime;
+    if (droneTimer > 0) droneTimer -= deltaTime;
+    if (catDebuffTimer > 0) catDebuffTimer -= deltaTime;
+}
+
+void Player::ActivateSkates(float duration) {
+    skatesTimer = duration; // 设置倒计时为 5.0f 秒
+}
+
 void Player::HandleInput(float moveSpeed, float jumpForce) {
     velocity.x = 0.0f;
+
+    float currentSpeed = baseMoveSpeed;
+    if (skatesTimer > 0) currentSpeed *= 1.25f; // 旱冰鞋加成 [cite: 40]
+    if (catDebuffTimer > 0) currentSpeed *= 0.5f; // 恶猫减速效果
     
     if (IsKeyDown(KEY_LEFT)) {
         velocity.x = -moveSpeed;

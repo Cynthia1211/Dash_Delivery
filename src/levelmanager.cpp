@@ -1,4 +1,6 @@
 #include "levelmanager.h"
+#include "entities/Roadblock.h"
+#include "entities/Skates.h"
 
 LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
     screenWidth = sWidth;
@@ -14,6 +16,8 @@ LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
 void LevelManager::LoadAssets() {
     backTexture = LoadTexture("../assets/background.png");
     foreTexture = LoadTexture("../assets/foreground.png");
+    roadblockTexture = LoadTexture("../assets/roadblock.png");
+    skatesTexture = LoadTexture("../assets/skates.png");
 
     float backHeight = screenHeight / 1.0f; 
     backScale = backHeight / (float)backTexture.height;
@@ -29,6 +33,8 @@ void LevelManager::LoadAssets() {
 void LevelManager::UnloadAssets() {
     UnloadTexture(backTexture);
     UnloadTexture(foreTexture);
+    UnloadTexture(roadblockTexture);
+    UnloadTexture(skatesTexture);
 }
 
 // 【核心改动】爽快的 switch-case 结构
@@ -43,10 +49,9 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.backScrollSpeed = 0.1f;    // 视差速度
             currentLevel.foreScrollSpeed = 0.5f;
             currentLevel.weather = WeatherType::SUNNY;
+            currentLevel.objects.push_back(std::make_shared<Roadblock>(600.0f, roadblockTexture));
+            currentLevel.objects.push_back(std::make_shared<Skates>(1200.0f, skatesTexture)); 
 
-            // 摆放障碍物（张月负责调整 worldX）
-            currentLevel.objects.push_back({ 600.0f, 40.0f, 50.0f, 0, RED });    // 基础方块障碍
-            currentLevel.objects.push_back({ 1200.0f, 30.0f, 30.0f, 1, GOLD });  // 道具：旱冰鞋
             break;
 
         case 2:
@@ -57,9 +62,9 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.weather = WeatherType::NIGHT;
 
             // 摆放第二关的敌人和道具
-            currentLevel.objects.push_back({ 500.0f, 40.0f, 40.0f, 3, ORANGE }); // 敌人：流氓
-            currentLevel.objects.push_back({ 1500.0f, 30.0f, 30.0f, 4, BLACK }); // 敌人：恶猫
-            currentLevel.objects.push_back({ 2500.0f, 40.0f, 20.0f, 2, BLUE });  // 道具：无人机
+            // currentLevel.objects.push_back({ 500.0f, 40.0f, 40.0f, 3, ORANGE }); // 敌人：流氓
+            // currentLevel.objects.push_back({ 1500.0f, 30.0f, 30.0f, 4, BLACK }); // 敌人：恶猫
+            // currentLevel.objects.push_back({ 2500.0f, 40.0f, 20.0f, 2, BLUE });  // 道具：无人机
             break;
 
         case 3:
@@ -71,7 +76,7 @@ void LevelManager::SetupLevel(int levelNumber) {
 
             // 用循环密集摆放第三关的障碍物
             for (float x = 800.0f; x < 5500.0f; x += 600.0f) {
-                currentLevel.objects.push_back({ x, 40.0f, 60.0f, 0, RED });
+                // currentLevel.objects.push_back({ x, 40.0f, 60.0f, 0, RED });
             }
             break;
 
@@ -86,20 +91,29 @@ void LevelManager::SetupLevel(int levelNumber) {
 }
 
 void LevelManager::Draw(float worldScrollOffset) {
-// 根据当前关卡配置的速度计算滚动
+    // ==========================================
+    // 1. 远景滚动计算（使用图片实际渲染宽度 backRenderWidth 取模）
+    // ==========================================
     float backBgScroll = -(worldScrollOffset * currentLevel.backScrollSpeed);
-    backBgScroll = (float)((int)backBgScroll % screenWidth);
+    // 使用 fmodf 对浮点数取模，防止转成 int 丢失精度导致卡顿
+    backBgScroll = fmodf(backBgScroll, backRenderWidth); 
+    if (backBgScroll > 0) backBgScroll -= backRenderWidth;
 
+    // 绘制远景：我们只需要在当前位置画一张，再紧接着在右边贴一张，就能实现完美无缝
+    DrawTextureEx(backTexture, (Vector2){ backBgScroll, backY }, 0.0f, backScale, backTint);
+    DrawTextureEx(backTexture, (Vector2){ backBgScroll + backRenderWidth, backY }, 0.0f, backScale, backTint);
+
+
+    // ==========================================
+    // 2. 近景滚动计算（使用图片实际渲染宽度 foreRenderWidth 取模）
+    // ==========================================
     float foreBgScroll = -(worldScrollOffset * currentLevel.foreScrollSpeed);
-    foreBgScroll = (float)((int)foreBgScroll % screenWidth);
+    foreBgScroll = fmodf(foreBgScroll, foreRenderWidth);
+    if (foreBgScroll > 0) foreBgScroll -= foreRenderWidth;
 
-    // 绘制远景和近景
-    for (float xOffset = backBgScroll; xOffset < screenWidth; xOffset += backRenderWidth) {
-        DrawTextureEx(backTexture, (Vector2){ xOffset, backY }, 0.0f, backScale, backTint);
-    }
-    for (float xOffset = foreBgScroll; xOffset < screenWidth; xOffset += foreRenderWidth) {
-        DrawTextureEx(foreTexture, (Vector2){ xOffset, foreY }, 0.0f, foreScale, foreTint);
-    }
+    // 绘制近景：同样是连续贴两张
+    DrawTextureEx(foreTexture, (Vector2){ foreBgScroll, foreY }, 0.0f, foreScale, foreTint);
+    DrawTextureEx(foreTexture, (Vector2){ foreBgScroll + foreRenderWidth, foreY }, 0.0f, foreScale, foreTint);
 
     DrawRectangle(0, groundY, screenWidth, screenHeight - groundY, GRAY);
 
@@ -119,16 +133,16 @@ void LevelManager::Draw(float worldScrollOffset) {
 
     // 绘制当前关卡的所有物体
     for (const auto& obj : currentLevel.objects) {
-        float screenX = obj.worldX - worldScrollOffset;
-        if (screenX + obj.width > 0 && screenX < screenWidth) {
+        // 1. 如果有些道具被吃了（isAlive == false），就不渲染它
+        if (!obj->isAlive) continue;
 
-            // 1. 声明与 Player 相同的视觉透视偏移量
-            float perspectiveOffsetY = 40.0f;
-            float screenY = groundY - obj.height + perspectiveOffsetY;;
-            DrawRectangle(screenX, screenY, obj.width, obj.height, obj.color);
-            
-            if (obj.type == 1) DrawText("SKATES", screenX, screenY - 15, 10, GOLD);
-            if (obj.type == 2) DrawText("DRONE", screenX, screenY - 15, 10, BLUE);
+        // 2. 将所有的 . 换成 -> 访问智能指针
+        float screenX = obj->worldX - worldScrollOffset;
+
+        if (screenX + obj->width > 0 && screenX < screenWidth) {
+
+            obj->Draw(worldScrollOffset, groundY);
+
         }
     }
 

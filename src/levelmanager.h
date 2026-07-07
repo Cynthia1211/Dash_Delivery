@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
+#include "entities/GameObject.h"
 
 
 // 1. 定义天气类型
@@ -22,7 +23,7 @@ struct LevelConfig {
     float backScrollSpeed;    // 远景滚动系数（例如第一关 0.1，后面越来越快）
     float foreScrollSpeed;    // 近景滚动系数（例如第一关 0.5）
     WeatherType weather;      // 当前关卡的天气
-    std::vector<LevelObject> objects; // 当前关卡的所有障碍物和道具列表
+    std::vector<std::shared_ptr<GameObject>> objects;
 };
 
 
@@ -31,6 +32,8 @@ public:
     // 远景和近景纹理
     Texture2D backTexture;
     Texture2D foreTexture;
+    Texture2D roadblockTexture;
+    Texture2D skatesTexture;
 
     // 屏幕和渲染尺寸参数
     int screenWidth;

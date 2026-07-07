@@ -41,7 +41,12 @@ int main() {
         // =================================================================
         if (gameState == 0) {
             // ----- 状态 0：正常游戏中 -----
-            
+
+            float deltaTime = GetFrameTime();
+
+            // 1. 先更新计时器
+            player.UpdateTimers(deltaTime);
+
             // 1. 玩家输入控制与物理更新
             player.HandleInput(MOVE_SPEED, JUMP_FORCE);
             player.UpdatePhysics(deltaTime, GRAVITY, GROUND_Y);
