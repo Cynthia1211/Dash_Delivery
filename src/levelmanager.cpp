@@ -1,6 +1,8 @@
 #include "levelmanager.h"
 #include "entities/Roadblock.h"
 #include "entities/Skates.h"
+#include "entities/StrayCat.h"       // <-- 【新增】
+#include "entities/StreetGangster.h" // <-- 【新增】
 
 LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
     screenWidth = sWidth;
@@ -18,6 +20,8 @@ void LevelManager::LoadAssets() {
     foreTexture = LoadTexture("../assets/foreground.png");
     roadblockTexture = LoadTexture("../assets/roadblock.png");
     skatesTexture = LoadTexture("../assets/skates.png");
+    catTexture = LoadTexture("../assets/cat.png");               // <-- 【新增】
+    gangsterTexture = LoadTexture("../assets/gangster.png");
 
     float backHeight = screenHeight / 1.0f; 
     backScale = backHeight / (float)backTexture.height;
@@ -35,6 +39,8 @@ void LevelManager::UnloadAssets() {
     UnloadTexture(foreTexture);
     UnloadTexture(roadblockTexture);
     UnloadTexture(skatesTexture);
+    UnloadTexture(catTexture);       // <-- 【新增】
+    UnloadTexture(gangsterTexture);
 }
 
 // 【核心改动】爽快的 switch-case 结构
@@ -61,10 +67,10 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.foreScrollSpeed = 0.7f;
             currentLevel.weather = WeatherType::NIGHT;
 
-            // 摆放第二关的敌人和道具
-            // currentLevel.objects.push_back({ 500.0f, 40.0f, 40.0f, 3, ORANGE }); // 敌人：流氓
-            // currentLevel.objects.push_back({ 1500.0f, 30.0f, 30.0f, 4, BLACK }); // 敌人：恶猫
-            // currentLevel.objects.push_back({ 2500.0f, 40.0f, 20.0f, 2, BLUE });  // 道具：无人机
+            // 【新写法】摆放真实的敌人
+            currentLevel.objects.push_back(std::make_shared<StreetGangster>(500.0f, gangsterTexture)); // 500米处有流氓
+            currentLevel.objects.push_back(std::make_shared<StrayCat>(1500.0f, catTexture));          // 1500米处有恶猫
+            currentLevel.objects.push_back(std::make_shared<Skates>(2500.0f, skatesTexture));          // 2500米处有旱冰鞋
             break;
 
         case 3:
@@ -74,9 +80,13 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.foreScrollSpeed = 0.9f;
             currentLevel.weather = WeatherType::RAIN;
 
-            // 用循环密集摆放第三关的障碍物
+            // 【新写法】用循环在第三关每隔600米交替生成流氓和恶猫
             for (float x = 800.0f; x < 5500.0f; x += 600.0f) {
-                // currentLevel.objects.push_back({ x, 40.0f, 60.0f, 0, RED });
+                if ((int)x % 1200 == 0) {
+                    currentLevel.objects.push_back(std::make_shared<StreetGangster>(x, gangsterTexture));
+                } else {
+                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, catTexture));
+                }
             }
             break;
 

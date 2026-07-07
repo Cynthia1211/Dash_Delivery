@@ -35,6 +35,8 @@ public:
     Texture2D foreTexture;
     Texture2D roadblockTexture;
     Texture2D skatesTexture;
+    Texture2D catTexture;       // <-- 【新增】猫的贴图
+    Texture2D gangsterTexture;  // <-- 【新增】流氓的贴图
 
     // 屏幕和渲染尺寸参数
     int screenWidth;
