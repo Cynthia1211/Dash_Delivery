@@ -125,9 +125,7 @@ int main() {
 
         // 根据不同状态，在屏幕最上层盖上不同的文字提示 UI（张月负责的部分）
         if (gameState == 0) {
-            // 游戏正常进行时显示当前的关卡数
-            DrawText(TextFormat("STAGE %d", currentStage), 10, 10, 20, MAROON);
-            DrawText(TextFormat("Player Screen X: %.1f | World Distance: %.1f", player.pos.x, worldScrollOffset), 10, 40, 16, LIGHTGRAY);
+            level.DrawHUD(player, worldScrollOffset);
         } 
         else if (gameState == 1) {
             // 关卡通过，等待自动开启下一关的黑色半透明遮罩

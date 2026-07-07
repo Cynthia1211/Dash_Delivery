@@ -157,3 +157,40 @@ void LevelManager::Draw(float worldScrollOffset) {
 bool LevelManager::CheckWin(float worldScrollOffset) {
     return worldScrollOffset >= currentLevel.maxDistance;
 }
+
+// ======= 💡 在 levelmanager.cpp 最底部粘贴这段代码 =======
+void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
+    // 1. 绘制顶部半透明灰色背景条 (宽度 800, 高度 60)
+    float hudHeight = 60.0f;
+    DrawRectangle(0, 0, screenWidth, hudHeight, (Color){ 40, 40, 40, 180 }); 
+    DrawLine(0, hudHeight, screenWidth, hudHeight, (Color){ 200, 200, 200, 100 }); // 精致分割线
+
+    // 2. 显示当前关卡
+    DrawText(TextFormat("STAGE %d", currentLevel.levelNumber), 20, 20, 20, WHITE);
+
+    // 3. 计算并显示完成路程百分比 %
+    float playerAbsoluteX = worldScrollOffset + player.pos.x;
+    float progressPercent = (playerAbsoluteX / currentLevel.maxDistance) * 100.0f;
+    if (progressPercent > 100.0f) progressPercent = 100.0f; // 封顶 100%
+    
+    DrawText(TextFormat("PROGRESS: %.1f%%", progressPercent), 150, 22, 16, LIGHTGRAY);
+
+    // 4. 显示 Food Status 食物状态血条
+    DrawText("FOOD:", 360, 22, 16, WHITE);
+    DrawRectangle(420, 23, 150, 16, MAROON); // 血条暗红底槽
+    
+    float barWidth = (player.foodStatus / 100.0f) * 150.0f;
+    if (barWidth < 0) barWidth = 0;
+    DrawRectangle(420, 23, (int)barWidth, 16, RED); // 鲜红当前血量
+    DrawText(TextFormat("%.0f%%", player.foodStatus), 475, 25, 12, WHITE);
+
+    // 5. 显示生效中的道具 Buff
+    int buffX = 600; // Buff 标志起始横坐标
+    
+    // 检查旱冰鞋道具计时器（假设你的 Player 类里有 skatesTimer 属性）
+    if (player.skatesTimer > 0) {
+        DrawRectangle(buffX, 18, 80, 24, GOLD);
+        DrawText(TextFormat("SKATES %.1fs", player.skatesTimer), buffX + 5, 24, 11, BLACK);
+        buffX += 90;
+    }
+}

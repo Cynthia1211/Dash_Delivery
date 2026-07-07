@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include <vector>
 #include "entities/GameObject.h"
+#include "entities/Player.h"
 
 
 // 1. 定义天气类型
@@ -66,4 +67,6 @@ public:
     void SetupLevel(int levelNumber);
     void Draw(float worldScrollOffset);
     bool CheckWin(float worldScrollOffset);
+
+    void DrawHUD(const Player& player, float worldScrollOffset);
 };
