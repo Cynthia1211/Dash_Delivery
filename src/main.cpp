@@ -81,8 +81,29 @@ int main() {
             if (player.pos.x - player.radius < 0) player.pos.x = player.radius;
             if (player.pos.x + player.radius > SCREEN_WIDTH) player.pos.x = SCREEN_WIDTH - player.radius;
 
-            // 4. 检查是否触碰终点线（完美修复：小人亲脚踩到终点线才算过关）
-            float playerWorldX = worldScrollOffset + player.pos.x; // 计算小人在世界中的绝对 X 坐标
+            // 4. 碰撞检测（AABB，世界坐标 X + 屏幕坐标 Y）
+            float pWorldX = worldScrollOffset + player.pos.x;
+            for (auto& obj : level.currentLevel.objects) {
+                if (!obj->isAlive) continue;
+
+                bool overlapX = pWorldX + player.radius > obj->worldX &&
+                                pWorldX - player.radius < obj->worldX + obj->width;
+                bool overlapY = player.pos.y + player.radius > GROUND_Y - obj->height &&
+                                player.pos.y - player.spriteHeight + player.radius < GROUND_Y;
+
+                if (overlapX && overlapY) {
+                    obj->OnCollision(player);
+                }
+            }
+
+            // 5. 食物状态归零 → 任务失败
+            if (player.foodStatus <= 0.0f) {
+                player.foodStatus = 0.0f;
+                gameState = 3;
+            }
+
+            // 6. 检查是否触碰终点线（完美修复：小人亲脚踩到终点线才算过关）
+            float playerWorldX = pWorldX;
             if (playerWorldX + player.radius >= level.currentLevel.maxDistance) {
                 if (currentStage < 3) {
                     // 如果还没到第 3 关，进入关卡过渡状态
@@ -138,6 +159,26 @@ int main() {
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 200 });
             DrawText("CONGRATULATIONS!", 180, 160, 40, GOLD);
             DrawText("You Delivered All Orders On Time!", 200, 220, 20, WHITE);
+        }
+        else if (gameState == 3) {
+            // 任务失败
+            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 200 });
+            DrawText("MISSION FAILED", 210, 160, 40, RED);
+            DrawText("Food status dropped to 0%!", 240, 220, 20, WHITE);
+            DrawText("Press R to Restart", 290, 260, 20, LIGHTGRAY);
+
+            if (IsKeyPressed(KEY_R)) {
+                currentStage = 1;
+                worldScrollOffset = 0.0f;
+                player.pos = { 100.0f, GROUND_Y - player.radius };
+                player.velocity = { 0.0f, 0.0f };
+                player.isGrounded = true;
+                player.foodStatus = 100.0f;
+                player.skatesTimer = 0.0f;
+                player.catDebuffTimer = 0.0f;
+                level.SetupLevel(currentStage);
+                gameState = 0;
+            }
         }
 
         DrawLine(CAMERA_TRIGGER_X, 0, CAMERA_TRIGGER_X, GROUND_Y, LIGHTGRAY);

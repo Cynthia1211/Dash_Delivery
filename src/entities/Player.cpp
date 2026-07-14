@@ -30,11 +30,11 @@ void Player::HandleInput(float moveSpeed, float jumpForce) {
     if (catDebuffTimer > 0) currentSpeed *= 0.5f; // 恶猫减速效果
     
     if (IsKeyDown(KEY_LEFT)) {
-        velocity.x = -moveSpeed;
-        facing = -1.0f; // 修复原本 main 中向左走不翻转的 Bug
+        velocity.x = -currentSpeed;
+        facing = -1.0f;
     }
     if (IsKeyDown(KEY_RIGHT)) {
-        velocity.x = moveSpeed;
+        velocity.x = currentSpeed;
         facing = 1.0f;
     }
 

@@ -29,8 +29,8 @@ public:
     }
 
     void OnCollision(Player& player) override {
-        player.foodStatus -= 15.0f;       // 1. 恶猫街斗：扣除食物血量
-        // player.ActivateSlowdown(5.0f); // 2. 减速 5 秒（等明达在 Player 里实现了这个函数后可以解开注释）
-        isAlive = false;                  // 触发后消失
+        player.foodStatus -= 15.0f;
+        player.catDebuffTimer = 5.0f;
+        isAlive = false;
     }
 };

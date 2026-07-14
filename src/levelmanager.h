@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
+#include <memory>
 #include "entities/GameObject.h"
 #include "entities/Player.h"
 

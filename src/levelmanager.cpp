@@ -1,4 +1,5 @@
 #include "levelmanager.h"
+#include <cmath>
 #include "entities/Roadblock.h"
 #include "entities/Skates.h"
 #include "entities/StrayCat.h"       // <-- 【新增】
