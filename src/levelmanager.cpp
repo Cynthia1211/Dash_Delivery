@@ -5,6 +5,7 @@
 #include "entities/Coupon.h"          // <-- 【新增】优惠券道具
 #include "entities/StrayCat.h"       // <-- 【新增】
 #include "entities/StreetGangster.h" // <-- 【新增】
+#include "entities/BlackTechBox.h"   // <-- 【新增】黑市技术盒
 
 LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
     screenWidth = sWidth;
@@ -25,6 +26,7 @@ void LevelManager::LoadAssets() {
     catTexture = LoadTexture("../assets/cat.png");               // <-- 【新增】
     gangsterTexture = LoadTexture("../assets/gangster.png");
     couponTexture = LoadTexture("../assets/coupon.png");         // <-- 【新增】优惠券贴图
+    blackBoxTexture = LoadTexture("../assets/blackBox.png");       // 黑市技术盒贴图
 
     float backHeight = screenHeight / 1.0f; 
     backScale = backHeight / (float)backTexture.height;
@@ -45,6 +47,7 @@ void LevelManager::UnloadAssets() {
     UnloadTexture(catTexture);       // <-- 【新增】
     UnloadTexture(gangsterTexture);
     UnloadTexture(couponTexture);    // <-- 【新增】优惠券贴图
+    UnloadTexture(blackBoxTexture);  // 黑市技术盒贴图
 }
 
 // 【核心改动】爽快的 switch-case 结构
@@ -58,9 +61,9 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.maxDistance = 2000.0f;     // 关卡长度
             currentLevel.backScrollSpeed = 0.1f;    // 视差速度
             currentLevel.foreScrollSpeed = 0.5f;
-            currentLevel.weather = WeatherType::SUNNY;
             currentLevel.countdownTimer = 30.0f;   // 第一关：90秒倒计时
-            currentLevel.objects.push_back(std::make_shared<Roadblock>(600.0f, roadblockTexture));
+            currentLevel.objects.push_back(std::make_shared<BlackTechBox>(500.0f, blackBoxTexture));    // 500米处：黑市技术盒（护盾）
+            currentLevel.objects.push_back(std::make_shared<Roadblock>(700.0f, roadblockTexture));     // 700米处：围栏
             currentLevel.objects.push_back(std::make_shared<Skates>(1200.0f, skatesTexture)); 
             currentLevel.objects.push_back(std::make_shared<Coupon>(900.0f, couponTexture, *this, 15.0f)); // 优惠券：增加15秒
 
@@ -71,11 +74,11 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.maxDistance = 4000.0f;
             currentLevel.backScrollSpeed = 0.15f;   // 速度稍微加快
             currentLevel.foreScrollSpeed = 0.7f;
-            currentLevel.weather = WeatherType::NIGHT;
             currentLevel.countdownTimer = 25.0f;   // 第二关：75秒倒计时
 
             // 【新写法】摆放真实的敌人
             currentLevel.objects.push_back(std::make_shared<StreetGangster>(500.0f, gangsterTexture)); // 500米处有流氓
+            currentLevel.objects.push_back(std::make_shared<BlackTechBox>(1000.0f, blackBoxTexture));    // 1000米处有黑市技术盒
             currentLevel.objects.push_back(std::make_shared<StrayCat>(1500.0f, catTexture));          // 1500米处有恶猫
             currentLevel.objects.push_back(std::make_shared<Skates>(2500.0f, skatesTexture));          // 2500米处有旱冰鞋
             break;
@@ -85,7 +88,6 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.maxDistance = 6000.0f;
             currentLevel.backScrollSpeed = 0.2f;    // 极速飙车
             currentLevel.foreScrollSpeed = 0.9f;
-            currentLevel.weather = WeatherType::RAIN;
             currentLevel.countdownTimer = 30.0f;   // 第三关：60秒倒计时
 
             // 【新写法】用循环在第三关每隔600米交替生成流氓和恶猫
@@ -134,20 +136,6 @@ void LevelManager::Draw(float worldScrollOffset) {
     DrawTextureEx(foreTexture, (Vector2){ foreBgScroll + foreRenderWidth, foreY }, 0.0f, foreScale, foreTint);
 
     DrawRectangle(0, groundY, screenWidth, screenHeight - groundY, GRAY);
-
-    // 根据天气渲染全局环境特效
-    switch (currentLevel.weather) {
-        case WeatherType::RAIN:
-            DrawText("WEATHER: HEAVY RAIN (Food status drops faster!)", 10, 70, 16, BLUE);
-            // 以后可以在这里加动态下雨特效
-            break;
-        case WeatherType::NIGHT:
-            DrawRectangle(0, 0, screenWidth, screenHeight, (Color){ 0, 0, 20, 120 }); // 黑色半透明夜幕
-            DrawText("WEATHER: NIGHT (Limited Visibility!)", 10, 70, 16, PURPLE);
-            break;
-        default:
-            break;
-    }
 
     // 绘制当前关卡的所有物体
     for (const auto& obj : currentLevel.objects) {
@@ -251,5 +239,12 @@ void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
         DrawRectangle(buffX, 48, 90, 24, DARKPURPLE);
         DrawText(TextFormat("DEBUFF %.1fs", player.catDebuffTimer), buffX + 5, 52, 11, WHITE);
         buffX += 100;
+    }
+    
+    // 检查黑市技术盒护盾
+    if (player.shieldActive) {
+        DrawRectangle(buffX, 48, 110, 24, BLUE);
+        DrawText("SHIELD ACTIVE", buffX + 5, 52, 11, WHITE);
+        buffX += 120;
     }
 }

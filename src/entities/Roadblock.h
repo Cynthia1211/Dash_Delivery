@@ -37,7 +37,11 @@ public:
     }
 
     void OnCollision(class Player& player) override {
-        player.foodStatus -= 10.0f; // 撞到扣血
+        if (player.shieldActive) {
+            player.shieldActive = false; // 护盾抵挡伤害
+        } else {
+            player.foodStatus -= 10.0f; // 撞到扣血
+        }
         isAlive = false; 
     }
 };

@@ -111,6 +111,7 @@ int main() {
             // 6. 检查是否触碰终点线（完美修复：小人亲脚踩到终点线才算过关）
             float playerWorldX = pWorldX;
             if (playerWorldX + player.radius >= level.currentLevel.maxDistance) {
+                player.shieldActive = false;  // 过关时重置护盾
                 if (currentStage < 3) {
                     // 如果还没到第 3 关，进入关卡过渡状态
                     gameState = 1; 
@@ -134,6 +135,7 @@ int main() {
                 player.pos.y = GROUND_Y - player.radius;
                 player.velocity = { 0.0f, 0.0f }; // 速度清零
                 player.isGrounded = true;
+                player.shieldActive = false;      // 重置护盾
                 
                 level.SetupLevel(currentStage);   // 核心：一键加载新关卡的数据（速度、天气、障碍物、倒计时）
                 gameState = 0;                    // 切回正常游戏状态
@@ -181,7 +183,9 @@ int main() {
                 player.isGrounded = true;
                 player.foodStatus = 100.0f;
                 player.skatesTimer = 0.0f;
+                player.droneTimer = 0.0f;
                 player.catDebuffTimer = 0.0f;
+                player.shieldActive = false;      // 重置护盾
                 level.SetupLevel(currentStage);
                 gameState = 0;
             }

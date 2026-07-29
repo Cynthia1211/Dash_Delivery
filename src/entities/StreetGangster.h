@@ -29,8 +29,12 @@ public:
     }
 
     void OnCollision(Player& player) override {
-        // 直接抢走外卖！食物血量清空，触发 main.cpp 里的游戏结束逻辑
-        player.foodStatus = 0.0f; 
+        if (player.shieldActive) {
+            player.shieldActive = false; // 护盾抵挡伤害
+        } else {
+            // 直接抢走外卖！食物血量清空，触发 main.cpp 里的游戏结束逻辑
+            player.foodStatus = 0.0f; 
+        }
         isAlive = false;
     }
 };

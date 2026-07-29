@@ -6,9 +6,6 @@
 #include "entities/Player.h"
 
 
-// 1. 定义天气类型
-enum class WeatherType { SUNNY, RAIN, WINDY, NIGHT };
-
 // 2. 定义障碍物与道具的数据结构
 struct LevelObject {
     float worldX;     // 世界绝对坐标 X
@@ -24,7 +21,6 @@ struct LevelConfig {
     float maxDistance;        // 关卡总长度（快递送达的终点线）
     float backScrollSpeed;    // 远景滚动系数（例如第一关 0.1，后面越来越快）
     float foreScrollSpeed;    // 近景滚动系数（例如第一关 0.5）
-    WeatherType weather;      // 当前关卡的天气
     float countdownTimer;     // 关卡倒计时时间（秒）
     std::vector<std::shared_ptr<GameObject>> objects;
 };
@@ -40,6 +36,7 @@ public:
     Texture2D catTexture;       // <-- 【新增】猫的贴图
     Texture2D gangsterTexture;  // <-- 【新增】流氓的贴图
     Texture2D couponTexture;    // <-- 【新增】优惠券的贴图
+    Texture2D blackBoxTexture;  // 黑市技术盒贴图
 
     // 屏幕和渲染尺寸参数
     int screenWidth;

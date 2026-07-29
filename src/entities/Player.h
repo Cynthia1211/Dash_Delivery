@@ -20,6 +20,7 @@ public:
     float skatesTimer = 0.0f;
     float droneTimer = 0.0f;
     float catDebuffTimer = 0.0f;
+    bool shieldActive = false;  // 黑市技术盒护盾状态
     
 
 

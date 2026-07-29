@@ -1,19 +1,20 @@
-// StrayCat.h (恶猫敌人)
+// BlackTechBox.h (黑市技术盒：抵挡下一次伤害/碰撞)
 #pragma once
 #include "GameObject.h"
 #include "../entities/Player.h"
 
-class StrayCat : public GameObject {
+class BlackTechBox : public GameObject {
 public:
-    Texture2D texture; // 存储猫的图片
+    Texture2D texture; // 存储盒子图片
 
-    StrayCat(float x, Texture2D tex) 
-        : GameObject(x, 40.0f, 40.0f, ObjectType::ROADBLOCK, ORANGE) { // 借用现有类型或看是否有对应枚举
+    BlackTechBox(float x, Texture2D tex) 
+        : GameObject(x, 40.0f, 40.0f, ObjectType::BLACK_TECH_BOX, BLUE) {
         texture = tex;
     }
 
     void Draw(float worldScrollOffset, float groundY) override {
         if (!isAlive) return;
+
         float screenX = worldX - worldScrollOffset;
         float perspectiveOffsetY = 40.0f;
         float screenY = groundY - height + perspectiveOffsetY;
@@ -24,17 +25,13 @@ public:
                 Rectangle{ screenX, screenY, width, height }, Vector2{ 0, 0 }, 0.0f, WHITE);
         } else {
             DrawRectangle(screenX, screenY, width, height, color);
-            DrawText("CAT", screenX + 5, screenY + 10, 12, BLACK);
+            DrawText("BLACK-TECH", screenX - 5, screenY - 15, 10, BLUE);
         }
     }
 
+    // 碰撞后：激活玩家保护盾
     void OnCollision(Player& player) override {
-        if (player.shieldActive) {
-            player.shieldActive = false; // 护盾抵挡伤害
-        } else {
-            player.foodStatus -= 15.0f;
-            player.catDebuffTimer = 5.0f;
-        }
-        isAlive = false;
+        player.shieldActive = true;
+        isAlive = false; // 道具被拾取后消失
     }
 };
