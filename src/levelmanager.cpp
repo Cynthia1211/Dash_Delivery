@@ -2,6 +2,7 @@
 #include <cmath>
 #include "entities/Roadblock.h"
 #include "entities/Skates.h"
+#include "entities/Coupon.h"          // <-- 【新增】优惠券道具
 #include "entities/StrayCat.h"       // <-- 【新增】
 #include "entities/StreetGangster.h" // <-- 【新增】
 
@@ -23,6 +24,7 @@ void LevelManager::LoadAssets() {
     skatesTexture = LoadTexture("../assets/skates.png");
     catTexture = LoadTexture("../assets/cat.png");               // <-- 【新增】
     gangsterTexture = LoadTexture("../assets/gangster.png");
+    couponTexture = LoadTexture("../assets/coupon.png");         // <-- 【新增】优惠券贴图
 
     float backHeight = screenHeight / 1.0f; 
     backScale = backHeight / (float)backTexture.height;
@@ -42,6 +44,7 @@ void LevelManager::UnloadAssets() {
     UnloadTexture(skatesTexture);
     UnloadTexture(catTexture);       // <-- 【新增】
     UnloadTexture(gangsterTexture);
+    UnloadTexture(couponTexture);    // <-- 【新增】优惠券贴图
 }
 
 // 【核心改动】爽快的 switch-case 结构
@@ -56,8 +59,10 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.backScrollSpeed = 0.1f;    // 视差速度
             currentLevel.foreScrollSpeed = 0.5f;
             currentLevel.weather = WeatherType::SUNNY;
+            currentLevel.countdownTimer = 30.0f;   // 第一关：90秒倒计时
             currentLevel.objects.push_back(std::make_shared<Roadblock>(600.0f, roadblockTexture));
             currentLevel.objects.push_back(std::make_shared<Skates>(1200.0f, skatesTexture)); 
+            currentLevel.objects.push_back(std::make_shared<Coupon>(900.0f, couponTexture, *this, 15.0f)); // 优惠券：增加15秒
 
             break;
 
@@ -67,6 +72,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.backScrollSpeed = 0.15f;   // 速度稍微加快
             currentLevel.foreScrollSpeed = 0.7f;
             currentLevel.weather = WeatherType::NIGHT;
+            currentLevel.countdownTimer = 25.0f;   // 第二关：75秒倒计时
 
             // 【新写法】摆放真实的敌人
             currentLevel.objects.push_back(std::make_shared<StreetGangster>(500.0f, gangsterTexture)); // 500米处有流氓
@@ -80,6 +86,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.backScrollSpeed = 0.2f;    // 极速飙车
             currentLevel.foreScrollSpeed = 0.9f;
             currentLevel.weather = WeatherType::RAIN;
+            currentLevel.countdownTimer = 30.0f;   // 第三关：60秒倒计时
 
             // 【新写法】用循环在第三关每隔600米交替生成流氓和恶猫
             for (float x = 800.0f; x < 5500.0f; x += 600.0f) {
@@ -169,13 +176,26 @@ bool LevelManager::CheckWin(float worldScrollOffset) {
     return worldScrollOffset >= currentLevel.maxDistance;
 }
 
-// ======= 💡 在 levelmanager.cpp 最底部粘贴这段代码 =======
+void LevelManager::UpdateCountdown(float deltaTime) {
+    currentLevel.countdownTimer -= deltaTime;
+    if (currentLevel.countdownTimer < 0.0f) {
+        currentLevel.countdownTimer = 0.0f;
+    }
+}
+
+// 给Coupon使用的接口：增加倒计时时间
+void LevelManager::AddCountdownTime(float seconds) {
+    currentLevel.countdownTimer += seconds;
+}
+
+// ======= HUD 绘制函数 =======
 void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
-    // 1. 绘制顶部半透明灰色背景条 (宽度 800, 高度 60)
-    float hudHeight = 60.0f;
+    // 1. 绘制顶部半透明灰色背景条 (宽度 800, 高度 80 - 加高以容纳更多内容)
+    float hudHeight = 80.0f;
     DrawRectangle(0, 0, screenWidth, hudHeight, (Color){ 40, 40, 40, 180 }); 
     DrawLine(0, hudHeight, screenWidth, hudHeight, (Color){ 200, 200, 200, 100 }); // 精致分割线
 
+    // --- 第一行内容 (y=20) ---
     // 2. 显示当前关卡
     DrawText(TextFormat("STAGE %d", currentLevel.levelNumber), 20, 20, 20, WHITE);
 
@@ -186,22 +206,50 @@ void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
     
     DrawText(TextFormat("PROGRESS: %.1f%%", progressPercent), 150, 22, 16, LIGHTGRAY);
 
-    // 4. 显示 Food Status 食物状态血条
-    DrawText("FOOD:", 360, 22, 16, WHITE);
-    DrawRectangle(420, 23, 150, 16, MAROON); // 血条暗红底槽
+    // 4. 显示倒计时 (放在进度条右侧)
+    int countdownX = 380; // 倒计时显示位置
+    DrawText("TIME:", countdownX, 20, 16, WHITE);
+    
+    // 根据剩余时间改变颜色
+    Color timeColor = LIME;
+    if (currentLevel.countdownTimer <= 10.0f) {
+        timeColor = RED; // 最后10秒变红
+    } else if (currentLevel.countdownTimer <= 30.0f) {
+        timeColor = GOLD; // 最后30秒变金色
+    }
+    DrawText(TextFormat("%.1fs", currentLevel.countdownTimer), countdownX + 55, 20, 18, timeColor);
+    
+    // --- 第二行内容 (y=48) ---
+    // 5. 显示 Food Status 食物状态血条 (放在第一行下方)
+    DrawText("FOOD:", 20, 48, 16, WHITE);
+    DrawRectangle(70, 50, 150, 16, MAROON); // 血条暗红底槽
     
     float barWidth = (player.foodStatus / 100.0f) * 150.0f;
     if (barWidth < 0) barWidth = 0;
-    DrawRectangle(420, 23, (int)barWidth, 16, RED); // 鲜红当前血量
-    DrawText(TextFormat("%.0f%%", player.foodStatus), 475, 25, 12, WHITE);
-
-    // 5. 显示生效中的道具 Buff
-    int buffX = 600; // Buff 标志起始横坐标
+    DrawRectangle(70, 50, (int)barWidth, 16, RED); // 鲜红当前血量
+    DrawText(TextFormat("%.0f%%", player.foodStatus), 120, 52, 12, WHITE);
     
-    // 检查旱冰鞋道具计时器（假设你的 Player 类里有 skatesTimer 属性）
+    // 6. 显示生效中的道具 Buff (放在食物条右侧)
+    int buffX = 280; // Buff 标志起始横坐标
+    
+    // 检查旱冰鞋道具计时器
     if (player.skatesTimer > 0) {
-        DrawRectangle(buffX, 18, 80, 24, GOLD);
-        DrawText(TextFormat("SKATES %.1fs", player.skatesTimer), buffX + 5, 24, 11, BLACK);
-        buffX += 90;
+        DrawRectangle(buffX, 48, 90, 24, GOLD);
+        DrawText(TextFormat("SKATES %.1fs", player.skatesTimer), buffX + 5, 52, 11, BLACK);
+        buffX += 100;
+    }
+    
+    // 检查无人机道具计时器
+    if (player.droneTimer > 0) {
+        DrawRectangle(buffX, 48, 90, 24, BLUE);
+        DrawText(TextFormat("DRONE %.1fs", player.droneTimer), buffX + 5, 52, 11, WHITE);
+        buffX += 100;
+    }
+    
+    // 检查恶猫减速效果计时器
+    if (player.catDebuffTimer > 0) {
+        DrawRectangle(buffX, 48, 90, 24, DARKPURPLE);
+        DrawText(TextFormat("DEBUFF %.1fs", player.catDebuffTimer), buffX + 5, 52, 11, WHITE);
+        buffX += 100;
     }
 }

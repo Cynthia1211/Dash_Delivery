@@ -46,6 +46,7 @@ int main() {
 
             // 1. 先更新计时器
             player.UpdateTimers(deltaTime);
+            level.UpdateCountdown(deltaTime); // 更新关卡倒计时
 
             // 1. 玩家输入控制与物理更新
             player.HandleInput(MOVE_SPEED, JUMP_FORCE);
@@ -102,6 +103,11 @@ int main() {
                 gameState = 3;
             }
 
+            // 5b. 倒计时归零 → 任务失败
+            if (level.currentLevel.countdownTimer <= 0.0f) {
+                gameState = 3;
+            }
+
             // 6. 检查是否触碰终点线（完美修复：小人亲脚踩到终点线才算过关）
             float playerWorldX = pWorldX;
             if (playerWorldX + player.radius >= level.currentLevel.maxDistance) {
@@ -129,7 +135,7 @@ int main() {
                 player.velocity = { 0.0f, 0.0f }; // 速度清零
                 player.isGrounded = true;
                 
-                level.SetupLevel(currentStage);   // 核心：一键加载新关卡的数据（速度、天气、障碍物）
+                level.SetupLevel(currentStage);   // 核心：一键加载新关卡的数据（速度、天气、障碍物、倒计时）
                 gameState = 0;                    // 切回正常游戏状态
             }
         }

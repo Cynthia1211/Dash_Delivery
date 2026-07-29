@@ -25,6 +25,7 @@ struct LevelConfig {
     float backScrollSpeed;    // 远景滚动系数（例如第一关 0.1，后面越来越快）
     float foreScrollSpeed;    // 近景滚动系数（例如第一关 0.5）
     WeatherType weather;      // 当前关卡的天气
+    float countdownTimer;     // 关卡倒计时时间（秒）
     std::vector<std::shared_ptr<GameObject>> objects;
 };
 
@@ -38,6 +39,7 @@ public:
     Texture2D skatesTexture;
     Texture2D catTexture;       // <-- 【新增】猫的贴图
     Texture2D gangsterTexture;  // <-- 【新增】流氓的贴图
+    Texture2D couponTexture;    // <-- 【新增】优惠券的贴图
 
     // 屏幕和渲染尺寸参数
     int screenWidth;
@@ -70,6 +72,8 @@ public:
     void SetupLevel(int levelNumber);
     void Draw(float worldScrollOffset);
     bool CheckWin(float worldScrollOffset);
-
+    void UpdateCountdown(float deltaTime); // 倒计时递减
+    void AddCountdownTime(float seconds); // 增加倒计时时间（供Coupon使用）
+    
     void DrawHUD(const Player& player, float worldScrollOffset);
 };
