@@ -111,8 +111,10 @@ int main() {
                                 pWorldX - player.radius < obj->worldX + obj->width;
                 
                 // Y轴检测：使用对象的worldY进行碰撞检测（支持空中道具）
+                // 使用 player.radius 而非 spriteHeight，避免碰撞检测框过大导致误判
+                // 玩家只有在垂直方向接近道具中心时才判定为碰撞
                 bool overlapY = player.pos.y + player.radius > obj->worldY &&
-                                player.pos.y - player.spriteHeight + player.radius < obj->worldY + obj->height;
+                                player.pos.y - player.radius < obj->worldY + obj->height;
 
                 if (overlapX && overlapY) {
                     obj->OnCollision(player);
