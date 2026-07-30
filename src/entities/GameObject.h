@@ -7,14 +7,15 @@ enum class ObjectType { ROADBLOCK, SKATES, BLACK_TECH_BOX, COUPON, DRONE, STRAY_
 class GameObject {
 public:
     float worldX;
+    float worldY;          // 道具在世界坐标系中的Y位置
     float width;
     float height;
     ObjectType type;
     Color color; // 临时测试颜色
     bool isAlive; // 是否激活（比如道具吃完就消失）
 
-    GameObject(float x, float w, float h, ObjectType t, Color c)
-        : worldX(x), width(w), height(h), type(t), color(c), isAlive(true) {}
+    GameObject(float x, float y, float w, float h, ObjectType t, Color c)
+        : worldX(x), worldY(y), width(w), height(h), type(t), color(c), isAlive(true) {}
 
     virtual ~GameObject() = default;
 

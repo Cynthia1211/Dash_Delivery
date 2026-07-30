@@ -9,9 +9,10 @@ public:
     float timeBonus;   // 增加的时间秒数
 
     // 构造函数：增加 Texture2D 和 LevelManager 参数
+    // x: X坐标, y: Y坐标（空中位置使用GetVerticalMiddleY计算）
     // timeBonus: 增加的时间秒数（默认 15 秒）
-    Coupon(float x, Texture2D tex, LevelManager& lm, float bonus = 15.0f) 
-        : GameObject(x, 30.0f, 30.0f, ObjectType::COUPON, GREEN) {
+    Coupon(float x, float y, Texture2D tex, LevelManager& lm, float bonus = 15.0f) 
+        : GameObject(x, y, 30.0f, 30.0f, ObjectType::COUPON, GREEN) {
         texture = tex;
         timeBonus = bonus;
         levelManager = &lm;

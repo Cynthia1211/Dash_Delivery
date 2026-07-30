@@ -58,98 +58,108 @@ void LevelManager::SetupLevel(int levelNumber) {
     currentLevel.levelNumber = levelNumber;
 
     switch (levelNumber) {
-        case 1:
+        case 1: {
             // ------- 第一关配置 -------
             currentLevel.maxDistance = 2000.0f;     // 关卡总长度2000米
             currentLevel.countdownTimer = 90.0f;   // 第一关：90秒倒计时
             currentLevel.foodDecayRate = 1.0f/90.0f;   // 食物每秒掉落 1/90
             
-            // 每600米处生成 roadblock (600m, 1200m)
-            for (float x = 600.0f; x < 2000.0f; x += 600.0f) {
-                currentLevel.objects.push_back(std::make_shared<Roadblock>(x, roadblockTexture));
+            // 每600米处生成 roadblock (600m, 1200m) — 地面道具
+            const float groundObjY = groundY - 50.0f;
+            for (float x = 500.0f; x < 2000.0f; x += 600.0f) {
+                currentLevel.objects.push_back(std::make_shared<Roadblock>(x, groundObjY, roadblockTexture));
             }
             
-            // 每800米处随机出现 skates, coupon, blackTechbox (800m, 1600m)
-            for (float x = 800.0f; x < 2000.0f; x += 800.0f) {
+            // 每800米处随机出现 skates, coupon, blackTechbox (800m, 1600m) — 空中道具
+            const float airObjY = GameObject::GetVerticalMiddleY(30.0f, screenHeight); // 30是道具高度
+            for (float x = 800.0f; x < 2000.0f; x += 700.0f) {
                 int randomChoice = rand() % 3;
                 if (randomChoice == 0) {
-                    currentLevel.objects.push_back(std::make_shared<Skates>(x, skatesTexture));
+                    currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY, skatesTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, couponTexture, *this, 15.0f));
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY, couponTexture, *this, 15.0f));
                 } else {
-                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, blackBoxTexture));
+                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, airObjY, blackBoxTexture));
                 }
             }
-
             break;
+        }
 
-        case 2:
+        case 2: {
             // ------- 第二关配置 -------
             currentLevel.maxDistance = 5000.0f;     // 关卡总长度5000米
             currentLevel.countdownTimer = 40.0f;   // 第二关：40秒倒计时
             currentLevel.foodDecayRate = 1.0f/60.0f;   // 食物每秒掉落 1/60
             
-            // 每600米处随机出现 straycat, streetgangster, roadblock
-            for (float x = 600.0f; x < 5000.0f; x += 600.0f) {
+            const float groundObjY2 = groundY - 50.0f;
+            const float airObjY2 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
+            
+            // 每600米处随机出现 straycat, streetgangster, roadblock (地面道具)
+            for (float x = 500.0f; x < 5000.0f; x += 600.0f) {
                 int randomChoice = rand() % 3;
                 if (randomChoice == 0) {
-                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, catTexture));
+                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, groundObjY2, catTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<StreetGangster>(x, gangsterTexture));
+                    currentLevel.objects.push_back(std::make_shared<StreetGangster>(x, groundObjY2, gangsterTexture));
                 } else {
-                    currentLevel.objects.push_back(std::make_shared<Roadblock>(x, roadblockTexture));
+                    currentLevel.objects.push_back(std::make_shared<Roadblock>(x, groundObjY2, roadblockTexture));
                 }
             }
             
-            // 每800米处随机出现 skates, coupon, blackTechbox
-            for (float x = 800.0f; x < 5000.0f; x += 800.0f) {
+            // 每800米处随机出现 skates, coupon, blackTechbox (空中道具)
+            for (float x = 800.0f; x < 5000.0f; x += 700.0f) {
                 int randomChoice = rand() % 3;
                 if (randomChoice == 0) {
-                    currentLevel.objects.push_back(std::make_shared<Skates>(x, skatesTexture));
+                    currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY2, skatesTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, couponTexture, *this, 15.0f));
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY2, couponTexture, *this, 15.0f));
                 } else {
-                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, blackBoxTexture));
+                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, airObjY2, blackBoxTexture));
                 }
             }
             
-            // 3300米处放置 deliveryDrone
-            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(3300.0f, droneTexture));
+            // 3300米处放置 deliveryDrone (空中道具)
+            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(3300.0f, airObjY2, droneTexture));
             break;
+            }
 
-        case 3:
+        case 3: {
             // ------- 第三关配置 -------
             currentLevel.maxDistance = 4000.0f;     // 关卡总长度4000米
             currentLevel.countdownTimer = 30.0f;   // 第三关：30秒倒计时
             currentLevel.foodDecayRate = 1.0f/40.0f;   // 食物每秒掉落 1/40
             
-            // 每500米处随机出现 straycat, streetgangster, roadblock
-            for (float x = 500.0f; x < 4000.0f; x += 500.0f) {
+            const float groundObjY3 = groundY - 50.0f;
+            const float airObjY3 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
+            
+            // 每500米处随机出现 straycat, streetgangster, roadblock (地面道具)
+            for (float x = 400.0f; x < 4000.0f; x += 500.0f) {
                 int randomChoice = rand() % 3;
                 if (randomChoice == 0) {
-                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, catTexture));
+                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, groundObjY3, catTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<StreetGangster>(x, gangsterTexture));
+                    currentLevel.objects.push_back(std::make_shared<StreetGangster>(x, groundObjY3, gangsterTexture));
                 } else {
-                    currentLevel.objects.push_back(std::make_shared<Roadblock>(x, roadblockTexture));
+                    currentLevel.objects.push_back(std::make_shared<Roadblock>(x, groundObjY3, roadblockTexture));
                 }
             }
             
-            // 每800米处随机出现 skates, coupon, blackTechbox
-            for (float x = 800.0f; x < 4000.0f; x += 800.0f) {
+            // 每800米处随机出现 skates, coupon, blackTechbox (空中道具)
+            for (float x = 800.0f; x < 4000.0f; x += 700.0f) {
                 int randomChoice = rand() % 3;
                 if (randomChoice == 0) {
-                    currentLevel.objects.push_back(std::make_shared<Skates>(x, skatesTexture));
+                    currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY3, skatesTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, couponTexture, *this, 15.0f));
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY3, couponTexture, *this, 15.0f));
                 } else {
-                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, blackBoxTexture));
+                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, airObjY3, blackBoxTexture));
                 }
             }
             
-            // 2700米处放置 deliveryDrone
-            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(2700.0f, droneTexture));
+            // 2700米处放置 deliveryDrone (空中道具)
+            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(2700.0f, airObjY3, droneTexture));
             break;
+            }
 
         // 万一以后你们想加第 4 关，直接在这里写：
         // case 4:

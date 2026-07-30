@@ -7,8 +7,9 @@ class StrayCat : public GameObject {
 public:
     Texture2D texture; // 存储猫的图片
 
-    StrayCat(float x, Texture2D tex) 
-        : GameObject(x, 40.0f, 40.0f, ObjectType::ROADBLOCK, ORANGE) { // 借用现有类型或看是否有对应枚举
+    // y: 在世界坐标系中的Y位置（地面为groundY）
+    StrayCat(float x, float y, Texture2D tex) 
+        : GameObject(x, y, 40.0f, 40.0f, ObjectType::STRAY_CAT, ORANGE) {
         texture = tex;
     }
 

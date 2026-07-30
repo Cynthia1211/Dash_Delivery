@@ -8,8 +8,9 @@ public:
     Texture2D texture; // 存储固定的旱冰鞋图片
 
     // 构造函数：增加 Texture2D 参数
-    Skates(float x, Texture2D tex) 
-        : GameObject(x, 30.0f, 30.0f, ObjectType::SKATES, GOLD) {
+    // y: 在世界坐标系中的Y位置（地面为groundY，空中使用GetVerticalMiddleY计算）
+    Skates(float x, float y, Texture2D tex) 
+        : GameObject(x, y, 30.0f, 30.0f, ObjectType::SKATES, GOLD) {
         texture = tex;
     }
 

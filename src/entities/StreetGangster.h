@@ -7,8 +7,9 @@ class StreetGangster : public GameObject {
 public:
     Texture2D texture; // 存储流氓的图片
 
-    StreetGangster(float x, Texture2D tex) 
-        : GameObject(x, 40.0f, 60.0f, ObjectType::ROADBLOCK, RED) {
+    // y: 在世界坐标系中的Y位置（地面为groundY）
+    StreetGangster(float x, float y, Texture2D tex) 
+        : GameObject(x, y, 40.0f, 60.0f, ObjectType::GANGSTER, RED) {
         texture = tex;
     }
 

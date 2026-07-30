@@ -101,15 +101,18 @@ int main() {
             if (player.pos.x - player.radius < 0) player.pos.x = player.radius;
             if (player.pos.x + player.radius > SCREEN_WIDTH) player.pos.x = SCREEN_WIDTH - player.radius;
 
-            // 4. 碰撞检测（AABB，世界坐标 X + 屏幕坐标 Y）
+            // 4. 碰撞检测（AABB，世界坐标 X + 世界坐标 Y）
             float pWorldX = worldScrollOffset + player.pos.x;
             for (auto& obj : level.currentLevel.objects) {
                 if (!obj->isAlive) continue;
 
+                // X轴检测：玩家右边界 > 对象左边界 且 玩家左边界 < 对象右边界
                 bool overlapX = pWorldX + player.radius > obj->worldX &&
                                 pWorldX - player.radius < obj->worldX + obj->width;
-                bool overlapY = player.pos.y + player.radius > GROUND_Y - obj->height &&
-                                player.pos.y - player.spriteHeight + player.radius < GROUND_Y;
+                
+                // Y轴检测：使用对象的worldY进行碰撞检测（支持空中道具）
+                bool overlapY = player.pos.y + player.radius > obj->worldY &&
+                                player.pos.y - player.spriteHeight + player.radius < obj->worldY + obj->height;
 
                 if (overlapX && overlapY) {
                     obj->OnCollision(player);

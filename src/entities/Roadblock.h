@@ -8,8 +8,9 @@ public:
     Texture2D texture; // 存储那张固定的路障图片
 
     // 构造函数：增加一个 Texture2D 参数
-    Roadblock(float x, Texture2D tex) 
-        : GameObject(x, 40.0f, 50.0f, ObjectType::ROADBLOCK, RED) {
+    // y: 在世界坐标系中的Y位置（地面为groundY）
+    Roadblock(float x, float y, Texture2D tex) 
+        : GameObject(x, y, 40.0f, 50.0f, ObjectType::ROADBLOCK, RED) {
         texture = tex;
     }
 

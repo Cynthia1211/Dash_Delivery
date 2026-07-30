@@ -9,8 +9,9 @@ public:
     float duration;    // 飞行持续时间（秒）
 
     // 构造函数
-    DeliveryDrone(float x, Texture2D tex) 
-        : GameObject(x, 30.0f, 30.0f, ObjectType::DRONE, BLUE) {
+    // x: X坐标, y: Y坐标（空中位置使用GetVerticalMiddleY计算）
+    DeliveryDrone(float x, float y, Texture2D tex) 
+        : GameObject(x, y, 30.0f, 30.0f, ObjectType::DRONE, BLUE) {
         texture = tex;
         duration = 5.0f;
     }

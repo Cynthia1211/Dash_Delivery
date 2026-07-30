@@ -7,8 +7,9 @@ class BlackTechBox : public GameObject {
 public:
     Texture2D texture; // 存储盒子图片
 
-    BlackTechBox(float x, Texture2D tex) 
-        : GameObject(x, 40.0f, 40.0f, ObjectType::BLACK_TECH_BOX, BLUE) {
+    // y: 在世界坐标系中的Y位置（地面为groundY，空中使用GetVerticalMiddleY计算）
+    BlackTechBox(float x, float y, Texture2D tex) 
+        : GameObject(x, y, 40.0f, 40.0f, ObjectType::BLACK_TECH_BOX, BLUE) {
         texture = tex;
     }
 
