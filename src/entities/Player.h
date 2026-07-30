@@ -14,37 +14,37 @@ public:
     float facing;
     Texture2D texture;
 
-    float baseMoveSpeed = 300.0f;    // 基础移动速度
-    float foodStatus = 100.0f; // 食物完整度 [cite: 18]
-    float groundY = 350.0f;  // 地面Y坐标（用于无人机道具）
+    float baseMoveSpeed = 300.0f;    // Base movement speed in pixels per second
+    float foodStatus = 100.0f;       // Food integrity percentage (100 = full delivery)
+    float groundY = 350.0f;          // Ground Y coordinate (used for drone power-up positioning)
 
     float skatesTimer = 0.0f;
     float droneTimer = 0.0f;
     float catDebuffTimer = 0.0f;
-    bool shieldActive = false;  // 黑市技术盒护盾状态
-    
+    bool shieldActive = false;       // Shield status from BlackTechBox power-up
 
-
-
-    // 构造函数
+    // Constructor: Initializes Player with default values
     Player();
 
-    // 处理玩家的键盘输入
+    // HandleInput: Processes player keyboard input for movement and jumping
     void HandleInput(float moveSpeed, float jumpForce);
 
-    // 处理物理位移、重力以及基本的地面碰撞
+    // UpdatePhysics: Handles physics simulation including velocity, gravity, and ground collision
     void UpdatePhysics(float deltaTime, float gravity, float groundY);
 
-    // 渲染外卖员图片（包含镜像翻转）
+    // Draw: Renders the delivery player sprite with direction-based mirroring
     void Draw();    
     
-    // 激活道具的函数
+    // ActivateSkates (legacy): Sets skate timer with speed boost parameter
     void ActivateSkates(float duration, float speedBoost)
     {
         skatesTimer = duration;
     }
 
-    void UpdateTimers(float deltaTime); // 每帧用来更新倒计时的函数
-    void ActivateSkates(float duration); // 吃到旱冰鞋时触发
-    void ActivateDrone(float duration); // 吃到无人机时触发
+    // UpdateTimers: Decrements all active power-up timers each frame
+    void UpdateTimers(float deltaTime);
+    // ActivateSkates: Triggered when player collects skate power-up
+    void ActivateSkates(float duration);
+    // ActivateDrone: Triggered when player collects drone power-up
+    void ActivateDrone(float duration);
 };

@@ -1,13 +1,14 @@
-// BlackTechBox.h (黑市技术盒：抵挡下一次伤害/碰撞)
+// BlackTechBox.h - Black market technology box that activates player shield protection
 #pragma once
 #include "GameObject.h"
 #include "../entities/Player.h"
 
 class BlackTechBox : public GameObject {
 public:
-    Texture2D texture; // 存储盒子图片
+    Texture2D texture; // Reference to the black tech box image texture
 
-    // y: 在世界坐标系中的Y位置（地面为groundY，空中使用GetVerticalMiddleY计算）
+    // Constructor: creates black tech box at given position
+    // x: X position, y: Y position in world coordinates (airborne items use GetVerticalMiddleY)
     BlackTechBox(float x, float y, Texture2D tex) 
         : GameObject(x, y, 40.0f, 40.0f, ObjectType::BLACK_TECH_BOX, BLUE) {
         texture = tex;
@@ -29,9 +30,9 @@ public:
         }
     }
 
-    // 碰撞后：激活玩家保护盾
+    // Collision effect: activate player shield protection
     void OnCollision(Player& player) override {
         player.shieldActive = true;
-        isAlive = false; // 道具被拾取后消失
+        isAlive = false; // Item collected, disappears after use
     }
 };

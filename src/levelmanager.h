@@ -7,48 +7,48 @@
 #include "entities/Player.h"
 
 
-// 2. 定义障碍物与道具的数据结构
+// 2. Define obstacle and item data structure
 struct LevelObject {
-    float worldX;     // 世界绝对坐标 X
-    float width;      // 宽度
-    float height;     // 高度（如果是道具，可以代表它离地面的高度）
-    int type;         // 0: 普通障碍方块, 1: 旱冰鞋, 2: 无人机, 3: 流氓, 4: 恶猫
-    Color color;      // 临时测试颜色
+    float worldX;     // World absolute X coordinate
+    float width;      // Width
+    float height;     // Height (for items, represents height above ground)
+    int type;         // 0: Normal obstacle, 1: Skates, 2: Drone, 3: Gangster, 4: Stray cat
+    Color color;      // Temporary test color
 };
 
-// 3. 核心：关卡配置结构体
+// 3. Core: Level configuration structure
 struct LevelConfig {
-    int levelNumber;          // 关卡编号（1, 2, 3）
-    float maxDistance;        // 关卡总长度（快递送达的终点线）
-    float countdownTimer;     // 关卡倒计时时间（秒）
-    float foodDecayRate;      // 食物完整度每秒掉落速率 (例如 1/90, 1/60, 1/40)
-    float initialTimer;       // 关卡初始倒计时时间（用于计算剩余时间比例）
+    int levelNumber;          // Level number (1, 2, 3)
+    float maxDistance;        // Total level distance (finish line for delivery)
+    float countdownTimer;     // Level countdown timer (seconds)
+    float foodDecayRate;      // Food status decay rate per second (e.g., 1/90, 1/60, 1/40)
+    float initialTimer;       // Initial level countdown time (for calculating remaining time ratio)
     std::vector<std::shared_ptr<GameObject>> objects;
 };
 
 
 class LevelManager {
 public:
-    // 分数系统
-    float currentLevelScore;    // 当前关卡得分
-    float totalScore;           // 总分数（所有已完成关卡得分之和）
-    int levelsCompleted;        // 已完成的关卡数
+    // Score system
+    float currentLevelScore;    // Current level score
+    float totalScore;           // Total score (sum of all completed level scores)
+    int levelsCompleted;        // Number of completed levels
 
-    // C++11 随机数生成器
+    // C++11 random number generator
     std::mt19937 rng;
 
-    // 远景和近景纹理
+    // Far and near background textures
     Texture2D backTexture;
     Texture2D foreTexture;
     Texture2D roadblockTexture;
     Texture2D skatesTexture;
-    Texture2D catTexture;       // <-- 【新增】猫的贴图
-    Texture2D gangsterTexture;  // <-- 【新增】流氓的贴图
-    Texture2D couponTexture;    // <-- 【新增】优惠券的贴图
-    Texture2D blackBoxTexture;  // 黑市技术盒贴图
-    Texture2D droneTexture;     // 【新增】配送无人机道具贴图
+    Texture2D catTexture;       // Stray cat texture
+    Texture2D gangsterTexture;  // Street gangster texture
+    Texture2D couponTexture;    // Coupon item texture
+    Texture2D blackBoxTexture;  // Black tech box texture
+    Texture2D droneTexture;     // Delivery drone item texture
 
-    // 屏幕和渲染尺寸参数
+    // Screen and rendering dimension parameters
     int screenWidth;
     int screenHeight;
     float groundY;
@@ -63,43 +63,43 @@ public:
     float foreY;
     Color foreTint;
 
-    // 视差滚动速度 (全局固定)
+    // Parallax scroll speeds (global fixed values)
     float backScrollSpeed;
     float foreScrollSpeed;
 
-    // 【新增】当前正在运行的关卡数据
+    // Currently running level data
     LevelConfig currentLevel;
 
-    // 构造函数
+    // Constructor
     LevelManager(int sWidth, int sHeight, float gY);
     
-    // 设置全局视差滚动速度
+    // Set global parallax scroll speeds
     void SetParallaxScrollSpeed(float backSpeed, float foreSpeed)
     {
         backScrollSpeed = backSpeed;
         foreScrollSpeed = foreSpeed;
     }
     
-    // 加载外部背景素材
+    // Load external background assets
     void LoadAssets();
     
-    // 卸载外部背景素材
+    // Unload external background assets
     void UnloadAssets();
     
-    // 用 switch-case 实现的核心函数
+    // Core functions implemented with switch-case
     void SetupLevel(int levelNumber);
     void Draw(float worldScrollOffset);
     bool CheckWin(float worldScrollOffset);
-    void UpdateCountdown(float deltaTime); // 倒计时递减
-    void AddCountdownTime(float seconds); // 增加倒计时时间（供Coupon使用）
-    void UpdateFoodDecay(float deltaTime, Player& player); // 食物完整度递减
+    void UpdateCountdown(float deltaTime); // Decrease countdown timer
+    void AddCountdownTime(float seconds); // Add time to countdown (used by Coupon)
+    void UpdateFoodDecay(float deltaTime, Player& player); // Decrease food status
     
     void DrawHUD(const Player& player, float worldScrollOffset);
     
-    // 分数计算函数
+    // Score calculation function
     float CalculateScore(float remainingTime, float foodCompleteness);
     
-    // 获取随机整数 (0 到 max-1)
+    // Get random integer (0 to max-1)
     int GetRandomInt(int max) {
         std::uniform_int_distribution<int> dist(0, max - 1);
         return dist(rng);

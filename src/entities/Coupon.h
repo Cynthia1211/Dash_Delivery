@@ -1,16 +1,19 @@
-// Coupon.h - 优惠券道具：拾取后立即增加整体关卡剩余时间
+// Coupon.h - Coupon Item: Collectible that instantly increases the level's remaining time
 #pragma once
 #include "GameObject.h"
 #include "../levelmanager.h"
 
 class Coupon : public GameObject {
 public:
-    Texture2D texture; // 存储优惠券图片
-    float timeBonus;   // 增加的时间秒数
+    Texture2D texture;  // Texture for rendering the coupon image
+    float timeBonus;    // Time bonus in seconds added to the level timer
 
-    // 构造函数：增加 Texture2D 和 LevelManager 参数
-    // x: X坐标, y: Y坐标（空中位置使用GetVerticalMiddleY计算）
-    // timeBonus: 增加的时间秒数（默认 15 秒）
+    // Constructor: Creates a coupon item at the specified position
+    // Parameters:
+    //   x, y: World coordinates for the coupon position
+    //   tex: Texture2D for rendering the coupon sprite
+    //   lm: Reference to LevelManager for time bonus application
+    //   bonus: Time bonus in seconds (default: 15.0f seconds)
     Coupon(float x, float y, Texture2D tex, LevelManager& lm, float bonus = 15.0f) 
         : GameObject(x, y, 30.0f, 30.0f, ObjectType::COUPON, GREEN) {
         texture = tex;
@@ -18,14 +21,18 @@ public:
         levelManager = &lm;
     }
 
-    // 重写 Draw 方法 - 使用屏幕垂直中间位置
+    // Draw: Renders the coupon at the vertical middle of the screen
+    // Parameters:
+    //   worldScrollOffset: Offset for scrolling effect
+    //   groundY: Ground Y coordinate (fallback position)
+    //   screenHeight: Screen height for vertical positioning
     void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) override {
         if (!isAlive) return;
 
         float screenX = worldX - worldScrollOffset;
         float screenY = screenHeight > 0 ? GetVerticalMiddleY(height, screenHeight) : groundY - height + 40.0f;
 
-        // 如果图片有效，就画图；否则画绿色方块和文字兜底
+        // Render coupon sprite if texture is valid; otherwise render fallback green rectangle with text
         if (texture.id > 0) {
             DrawTexturePro(
                 texture,
@@ -41,14 +48,15 @@ public:
         }
     }
 
-    // 碰撞后的即时效果：直接增加关卡的倒计时时间
+    // OnCollision: Handles collision with the player
+    // Effect: Immediately adds the time bonus to the LevelManager and deactivates the coupon
     void OnCollision(Player& player) override {
         if (levelManager) {
-            levelManager->AddCountdownTime(timeBonus); // 即时增加倒计时时间
+            levelManager->AddCountdownTime(timeBonus); // Instantly increase the countdown timer
         }
-        isAlive = false; // 道具被吃掉，不再可见和触发碰撞
+        isAlive = false; // Deactivate the item so it is no longer visible or collidable
     }
 
 private:
-    LevelManager* levelManager = nullptr; // 指向 LevelManager 的指针
+    LevelManager* levelManager = nullptr; // Pointer to LevelManager for time bonus updates
 };

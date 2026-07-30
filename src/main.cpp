@@ -2,7 +2,7 @@
 #include "entities/Player.h"
 #include "levelmanager.h"
 
-// 背景音乐
+// Background music resource
 Music backgroundMusic;
 
 const int SCREEN_WIDTH = 800;
@@ -12,7 +12,7 @@ const float JUMP_FORCE = -600.0f;
 const float MOVE_SPEED = 300.0f;  
 const float GROUND_Y = 350.0f;
 
-// 全局视差滚动速度 (所有关卡共用)
+// Global parallax scroll speeds (shared across all levels)
 const float BACK_SCROLL_SPEED = 0.1f;
 const float FORE_SCROLL_SPEED = 0.5f;
 
@@ -20,28 +20,28 @@ int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dash Delivery - Modular Architecture");
     SetTargetFPS(60);
 
-    // 初始化音频设备
+    // Initialize audio device
     InitAudioDevice();
 
-    // 加载并循环播放背景音乐 (LoadMusicStream 默认就是循环播放)
+    // Load and loop background music (LoadMusicStream defaults to looping)
     backgroundMusic = LoadMusicStream("../assets/backgroundSond.mp3");
     PlayMusicStream(backgroundMusic);
 
-    // 实例化模块
+    // Instantiate player module
     Player player;
     player.texture = LoadTexture("../assets/player.png");
 
-    // 在 main 函数内部的初始化部分添加：
-    int currentStage = 1; // 记录当前是第几关
+    // Track current stage number
+    int currentStage = 1;
 
-    // 定义游戏状态：0 = 游戏中，1 = 关卡间过渡（显示过关提示），2 = 游戏最终通关
+    // Define game states: 0 = playing, 1 = level transition, 2 = completed, 3 = failed
     int gameState = 0; 
 
-    // 记录过渡画面的计时器（比如让过关提示显示 3 秒钟）
+    // Timer for transition screen display (e.g., show level complete for 3 seconds)
     float stageTransitionTimer = 0.0f;
 
     LevelManager level(SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_Y);
-    level.SetParallaxScrollSpeed(BACK_SCROLL_SPEED, FORE_SCROLL_SPEED); // 设置全局视差滚动速度
+    level.SetParallaxScrollSpeed(BACK_SCROLL_SPEED, FORE_SCROLL_SPEED); // Set global parallax scroll speeds
     level.LoadAssets();
     level.SetupLevel(currentStage);
 
@@ -51,68 +51,67 @@ int main() {
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
-        // 更新背景音乐流
+        // Update background music stream
         UpdateMusicStream(backgroundMusic);
 
         // =================================================================
-        // 【核心逻辑控制】根据 gameState 分流
+        // [Core Logic Control] Route game behavior based on gameState
         // =================================================================
         if (gameState == 0) {
-            // ----- 状态 0：正常游戏中 -----
+            // ----- State 0: Normal gameplay -----
 
             float deltaTime = GetFrameTime();
 
-            // 1. 先更新计时器
+            // 1. Update player timers first
             player.UpdateTimers(deltaTime);
-            level.UpdateCountdown(deltaTime); // 更新关卡倒计时
-            level.UpdateFoodDecay(deltaTime, player); // 更新食物完整度递减
+            level.UpdateCountdown(deltaTime); // Update level countdown timer
+            level.UpdateFoodDecay(deltaTime, player); // Update food decay
 
-            // 1. 玩家输入控制与物理更新
+            // 2. Process player input and update physics
             player.HandleInput(MOVE_SPEED, JUMP_FORCE);
             player.UpdatePhysics(deltaTime, GRAVITY, GROUND_Y);
 
             // =================================================================
-            // 2. 屏幕锁定与滚动控制（完美修复版）
+            // 3. Screen Locking and Scrolling Control
             // =================================================================
             float nextPlayerX = player.pos.x + player.velocity.x * deltaTime;
 
-            // 1. 计算地图能滚动的最大极限（终点线刚好贴在屏幕最右侧）
+            // 1. Calculate max scroll limit (finish line at screen right edge)
             float maxScrollLimit = level.currentLevel.maxDistance - SCREEN_WIDTH;
 
-            // 2. 只有当地图还没滚到头，且玩家超过 1/3 触发线时，画面才滚动
+            // 2. Only scroll when map hasn't reached end AND player passes 1/3 trigger line
             if (player.velocity.x > 0 && nextPlayerX >= CAMERA_TRIGGER_X && worldScrollOffset < maxScrollLimit) {
                 
-                // 让小人固定在屏幕 1/3 处
+                // Lock player to 1/3 of screen
                 player.pos.x = CAMERA_TRIGGER_X;
                 
-                // 画面正常滚动
+                // Scroll the world
                 worldScrollOffset += player.velocity.x * deltaTime;
                 
-                // 【核心用处】如果这帧滚过头了，强制把它拉回到最大限制，卡死画面
+                // Clamp scroll offset to max limit
                 if (worldScrollOffset > maxScrollLimit) {
                     worldScrollOffset = maxScrollLimit;
                 }
             } else {
-                // 画面不动了，小人自己在屏幕里往右走（或者往左退）
+                // Player moves freely on screen when world isn't scrolling
                 player.pos.x = nextPlayerX;
             }
 
-            // 3. 边缘限制
+            // 3. Clamp player to screen edges
             if (player.pos.x - player.radius < 0) player.pos.x = player.radius;
             if (player.pos.x + player.radius > SCREEN_WIDTH) player.pos.x = SCREEN_WIDTH - player.radius;
 
-            // 4. 碰撞检测（AABB，世界坐标 X + 世界坐标 Y）
+            // 4. Collision detection (AABB using world coordinates)
             float pWorldX = worldScrollOffset + player.pos.x;
             for (auto& obj : level.currentLevel.objects) {
                 if (!obj->isAlive) continue;
 
-                // X轴检测：玩家右边界 > 对象左边界 且 玩家左边界 < 对象右边界
+                // X-axis check: player right edge > object left edge AND player left edge < object right edge
                 bool overlapX = pWorldX + player.radius > obj->worldX &&
                                 pWorldX - player.radius < obj->worldX + obj->width;
                 
-                // Y轴检测：使用对象的worldY进行碰撞检测（支持空中道具）
-                // 使用 player.radius 而非 spriteHeight，避免碰撞检测框过大导致误判
-                // 玩家只有在垂直方向接近道具中心时才判定为碰撞
+                // Y-axis check: use object's worldY for collision (supports airborne items)
+                // Use player.radius instead of spriteHeight to avoid overly large collision boxes
                 bool overlapY = player.pos.y + player.radius > obj->worldY &&
                                 player.pos.y - player.radius < obj->worldY + obj->height;
 
@@ -121,75 +120,76 @@ int main() {
                 }
             }
 
-            // 5. 食物状态归零 → 任务失败
+            // 5. Check if food status reached zero → mission failed
             if (player.foodStatus <= 0.0f) {
                 player.foodStatus = 0.0f;
                 gameState = 3;
             }
 
-            // 5b. 倒计时归零 → 任务失败
+            // 5b. Check if countdown reached zero → mission failed
             if (level.currentLevel.countdownTimer <= 0.0f) {
                 gameState = 3;
             }
 
-            // 6. 检查是否触碰终点线（完美修复：小人亲脚踩到终点线才算过关）
+            // 6. Check if player reached finish line (player's feet must touch the finish line)
             float playerWorldX = pWorldX;
             if (playerWorldX + player.radius >= level.currentLevel.maxDistance) {
-                player.shieldActive = false;  // 过关时重置护盾
+                player.shieldActive = false;  // Reset shield upon level completion
                 
-                // 计算当前关卡得分: 剩余时间 * 10 * 食物完整度 * 当前关卡数
-                float foodCompleteness = player.foodStatus / 100.0f; // 0-1范围
+                // Calculate current level score: remaining time * 10 * food completeness * level number
+                float foodCompleteness = player.foodStatus / 100.0f; // 0-1 range (food completeness ratio)
                 level.currentLevelScore = level.CalculateScore(level.currentLevel.countdownTimer, foodCompleteness);
                 level.totalScore += level.currentLevelScore;
                 level.levelsCompleted++;
                 
                 if (currentStage < 3) {
-                    // 如果还没到第 3 关，进入关卡过渡状态
+                    // Move to level transition state
                     gameState = 1; 
-                    stageTransitionTimer = 3.0f; // 提示显示 3 秒
+                    stageTransitionTimer = 3.0f; // Show hint for 3 seconds
                 } else {
-                    // 如果已经是第 3 关，说明全剧终，直接通关
+                    // Completed all 3 levels → game finished
                     gameState = 2;
                 }
             }
         } 
         else if (gameState == 1) {
-            // ----- 状态 1：关卡过渡中（自动倒计时切换） -----
+            // ----- State 1: Level transition (auto countdown switch) -----
             stageTransitionTimer -= deltaTime;
             
             if (stageTransitionTimer <= 0.0f) {
-                // 3秒倒计时结束，自动切入下一关！
-                currentStage++;
-                worldScrollOffset = 0.0f;        // 核心：重置地图滚动距离
+            // 3-second countdown ended, auto switch to next level
+            currentStage++;
+            worldScrollOffset = 0.0f;        // Reset world scroll distance
 
-                player.pos.x = 100.0f;
-                player.pos.y = GROUND_Y - player.radius;
-                player.velocity = { 0.0f, 0.0f }; // 速度清零
-                player.isGrounded = true;
-                player.foodStatus = 100.0f;       // 重置食物完整度
-                player.shieldActive = false;      // 重置护盾
-                
-                level.SetupLevel(currentStage);   // 核心：一键加载新关卡的数据（速度、天气、障碍物、倒计时）
-                gameState = 0;                    // 切回正常游戏状态
+            player.pos.x = 100.0f;
+            player.pos.y = GROUND_Y - player.radius;
+            player.velocity = { 0.0f, 0.0f }; // Reset velocity
+            player.isGrounded = true;
+            player.foodStatus = 100.0f;       // Reset food status
+            player.shieldActive = false;      // Reset shield
+            
+            level.SetupLevel(currentStage);   // Load new level data (speed, obstacles, countdown)
+                gameState = 0;                    // Switch back to normal gameplay state
             }
         }
 
         // =================================================================
-        // 5. 渲染部分
+        // 6. Rendering Section
         // =================================================================
         BeginDrawing();
         ClearBackground(SKYBLUE); 
 
-        // 无论什么状态，都先把背景、地面和小人画出来
+        // Render background, ground, and player regardless of game state
         level.Draw(worldScrollOffset);
         player.Draw();
 
-        // 根据不同状态，在屏幕最上层盖上不同的文字提示 UI（张月负责的部分）
+        // Display different UI text overlays based on game state
         if (gameState == 0) {
+            // Draw in-game HUD (score, timer, food status)
             level.DrawHUD(player, worldScrollOffset);
         } 
         else if (gameState == 1) {
-            // 关卡通过，等待自动开启下一关的黑色半透明遮罩
+            // Level complete: show semi-transparent overlay waiting for next level
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 150 });
             DrawText(TextFormat("STAGE %d CLEAR!", currentStage), 260, 140, 40, GREEN);
             DrawText(TextFormat("Stage Score: %.0f", level.currentLevelScore), 280, 190, 24, GOLD);
@@ -197,7 +197,7 @@ int main() {
             DrawText(TextFormat("Next Stage starts in %d seconds...", (int)stageTransitionTimer), 240, 280, 20, WHITE);
         } 
         else if (gameState == 2) {
-            // 最终大通关 - 显示三关总分
+            // Final completion - show total score across all levels
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 200 });
             DrawText("CONGRATULATIONS!", 180, 120, 40, GOLD);
             DrawText("You Delivered All Orders On Time!", 200, 170, 20, WHITE);
@@ -205,7 +205,7 @@ int main() {
             DrawText(TextFormat("Levels Completed: %d/3", level.levelsCompleted), 290, 280, 20, WHITE);
         }
         else if (gameState == 3) {
-            // 任务失败
+            // Mission failed
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 200 });
             DrawText("MISSION FAILED", 210, 140, 40, RED);
             DrawText("Food status dropped to 0%!", 240, 190, 20, WHITE);
@@ -213,6 +213,7 @@ int main() {
             DrawText("Press R to Restart", 290, 270, 20, LIGHTGRAY);
 
             if (IsKeyPressed(KEY_R)) {
+                // Restart game: reset all state variables
                 currentStage = 1;
                 worldScrollOffset = 0.0f;
                 player.pos = { 100.0f, GROUND_Y - player.radius };
@@ -222,10 +223,10 @@ int main() {
                 player.skatesTimer = 0.0f;
                 player.droneTimer = 0.0f;
                 player.catDebuffTimer = 0.0f;
-                player.shieldActive = false;      // 重置护盾
-                level.totalScore = 0.0f;          // 重置总分
-                level.levelsCompleted = 0;        // 重置完成关卡数
-                level.currentLevelScore = 0.0f;   // 重置当前关卡分数
+                player.shieldActive = false;      // Reset shield
+                level.totalScore = 0.0f;          // Reset total score
+                level.levelsCompleted = 0;        // Reset levels completed
+                level.currentLevelScore = 0.0f;   // Reset current level score
                 level.SetupLevel(currentStage);
                 gameState = 0;
             }
@@ -236,15 +237,15 @@ int main() {
         EndDrawing();
     }
     
-    // 停止并卸载背景音乐
-    StopMusicStream(backgroundMusic);
-    UnloadMusicStream(backgroundMusic);
+        // Stop and unload background music
+        StopMusicStream(backgroundMusic);
+        UnloadMusicStream(backgroundMusic);
     
-    // 关闭音频设备
-    CloseAudioDevice();
+        // Close audio device
+        CloseAudioDevice();
 
-    // 清理资源
-    UnloadTexture(player.texture);
+        // Clean up resources
+        UnloadTexture(player.texture);
     level.UnloadAssets();
     CloseWindow();
 

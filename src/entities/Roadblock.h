@@ -1,20 +1,20 @@
-// Roadblock.h (路障)
+// Roadblock.h - Static roadblock obstacle that damages player
 #pragma once
 #include "GameObject.h"
-#include "../entities/Player.h" // 假设你的Player类定义在entities
+#include "../entities/Player.h" // Player class defined in entities directory
 
 class Roadblock : public GameObject {
 public:
-    Texture2D texture; // 存储那张固定的路障图片
+    Texture2D texture; // Reference to the roadblock image texture
 
-    // 构造函数：增加一个 Texture2D 参数
-    // y: 在世界坐标系中的Y位置（地面为groundY）
+    // Constructor: accepts Texture2D for custom rendering
+    // x: X position, y: Y position in world coordinates (ground level = groundY)
     Roadblock(float x, float y, Texture2D tex) 
         : GameObject(x, y, 40.0f, 50.0f, ObjectType::ROADBLOCK, RED) {
         texture = tex;
     }
 
-    // 重写 Draw 方法
+    // Override Draw: renders roadblock texture with perspective offset
     void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) override {
         if (!isAlive) return;
 
@@ -22,7 +22,7 @@ public:
         float perspectiveOffsetY = 40.0f;
         float screenY = groundY - height + perspectiveOffsetY;
 
-        // 如果图片有效（id不为0），就画图；否则画红色方块兜底
+        // Render texture if valid, otherwise render red rectangle as fallback
         if (texture.id > 0) {
             DrawTexturePro(
                 texture,
@@ -39,9 +39,9 @@ public:
 
     void OnCollision(class Player& player) override {
         if (player.shieldActive) {
-            player.shieldActive = false; // 护盾抵挡伤害
+            player.shieldActive = false; // Shield absorbs the impact
         } else {
-            player.foodStatus -= 10.0f; // 撞到扣血
+            player.foodStatus -= 10.0f; // Damage player food status on collision
         }
         isAlive = false; 
     }
