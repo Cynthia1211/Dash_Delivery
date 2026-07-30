@@ -1,14 +1,12 @@
-// StrayCat.h - Stray cat enemy that reduces player speed and food status
 #pragma once
 #include "GameObject.h"
 #include "../entities/Player.h"
 
 class StrayCat : public GameObject {
 public:
-    Texture2D texture; // Reference to the cat image texture
+    Texture2D texture; 
 
-    // Constructor: creates stray cat at given position
-    // x: X position, y: Y position in world coordinates (ground level = groundY)
+    // Creates stray cat 
     StrayCat(float x, float y, Texture2D tex) 
         : GameObject(x, y, 40.0f, 40.0f, ObjectType::STRAY_CAT) {
         texture = tex;
@@ -30,9 +28,12 @@ public:
         }
     }
 
+    // Handles collision with the player
+    // If player has active shield, consume it. 
+    // Otherwise, decrease speed and food status
     void OnCollision(Player& player) override {
         if (player.shieldActive) {
-            player.shieldActive = false; // Shield absorbs the impact
+            player.shieldActive = false;
         } else {
             player.foodStatus -= 15.0f;
             player.catDebuffTimer = 5.0f;

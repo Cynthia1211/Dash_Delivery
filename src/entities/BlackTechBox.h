@@ -1,14 +1,12 @@
-// BlackTechBox.h - Black market technology box that activates player shield protection
 #pragma once
 #include "GameObject.h"
 #include "../entities/Player.h"
 
 class BlackTechBox : public GameObject {
 public:
-    Texture2D texture; // Reference to the black tech box image texture
+    Texture2D texture; 
 
-    // Constructor: creates black tech box at given position
-    // x: X position, y: Y position in world coordinates (airborne items use GetVerticalMiddleY)
+    // Creates black tech box 
     BlackTechBox(float x, float y, Texture2D tex) 
         : GameObject(x, y, 40.0f, 40.0f, ObjectType::BLACK_TECH_BOX) {
         texture = tex;
@@ -30,9 +28,10 @@ public:
         }
     }
 
-    // Collision effect: activate player shield protection
+    // Handles collision with the player
+    // Buff: ignore next debuff
     void OnCollision(Player& player) override {
         player.shieldActive = true;
-        isAlive = false; // Item collected, disappears after use
+        isAlive = false; 
     }
 };
