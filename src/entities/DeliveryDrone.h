@@ -11,7 +11,7 @@ public:
     // Constructor: creates delivery drone at given position
     // x: X position, y: Y position (airborne items use GetVerticalMiddleY)
     DeliveryDrone(float x, float y, Texture2D tex) 
-        : GameObject(x, y, 30.0f, 30.0f, ObjectType::DRONE, BLUE) {
+        : GameObject(x, y, 30.0f, 30.0f, ObjectType::DRONE) {
         texture = tex;
         duration = 5.0f;
     }
@@ -34,7 +34,7 @@ public:
                 WHITE
             );
         } else {
-            DrawRectangle(screenX, screenY, width, height, color);
+            DrawRectangle(screenX, screenY, width, height, BLUE);
             DrawText("DRONE", screenX, screenY - 15, 10, BLUE);
         }
     }

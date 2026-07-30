@@ -15,7 +15,7 @@ public:
     //   lm: Reference to LevelManager for time bonus application
     //   bonus: Time bonus in seconds (default: 15.0f seconds)
     Coupon(float x, float y, Texture2D tex, LevelManager& lm, float bonus = 15.0f) 
-        : GameObject(x, y, 30.0f, 30.0f, ObjectType::COUPON, GREEN) {
+        : GameObject(x, y, 30.0f, 30.0f, ObjectType::COUPON) {
         texture = tex;
         timeBonus = bonus;
         levelManager = &lm;
@@ -43,7 +43,7 @@ public:
                 WHITE
             );
         } else {
-            DrawRectangle(screenX, screenY, width, height, color);
+            DrawRectangle(screenX, screenY, width, height, GREEN);
             DrawText("COUPON", screenX, screenY - 15, 10, GREEN);
         }
     }

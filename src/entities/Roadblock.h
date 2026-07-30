@@ -10,7 +10,7 @@ public:
     // Constructor: accepts Texture2D for custom rendering
     // x: X position, y: Y position in world coordinates (ground level = groundY)
     Roadblock(float x, float y, Texture2D tex) 
-        : GameObject(x, y, 40.0f, 50.0f, ObjectType::ROADBLOCK, RED) {
+        : GameObject(x, y, 40.0f, 50.0f, ObjectType::ROADBLOCK) {
         texture = tex;
     }
 
@@ -33,7 +33,7 @@ public:
                 WHITE
             );
         } else {
-            DrawRectangle(screenX, screenY, width, height, color);
+            DrawRectangle(screenX, screenY, width, height, RED);
         }
     }
 

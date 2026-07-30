@@ -10,7 +10,7 @@ public:
     // Constructor: accepts Texture2D for custom rendering
     // x: X position, y: Y position in world coordinates (airborne items use GetVerticalMiddleY)
     Skates(float x, float y, Texture2D tex) 
-        : GameObject(x, y, 30.0f, 30.0f, ObjectType::SKATES, GOLD) {
+        : GameObject(x, y, 30.0f, 30.0f, ObjectType::SKATES) {
         texture = tex;
     }
 
@@ -32,7 +32,7 @@ public:
                 WHITE
             );
         } else {
-            DrawRectangle(screenX, screenY, width, height, color);
+            DrawRectangle(screenX, screenY, width, height, GOLD);
             DrawText("SKATES", screenX, screenY - 15, 10, GOLD);
         }
     }

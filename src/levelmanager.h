@@ -7,34 +7,33 @@
 #include "entities/Player.h"
 
 
-// 2. Define obstacle and item data structure
+// Define item structure
 struct LevelObject {
-    float worldX;     // World absolute X coordinate
-    float width;      // Width
-    float height;     // Height (for items, represents height above ground)
-    int type;         // 0: Normal obstacle, 1: Skates, 2: Drone, 3: Gangster, 4: Stray cat
-    Color color;      // Temporary test color
+    float worldX;
+    float width;
+    float height;
+    int type;
 };
 
-// 3. Core: Level configuration structure
+// Define level configuration structure
 struct LevelConfig {
-    int levelNumber;          // Level number (1, 2, 3)
-    float maxDistance;        // Total level distance (finish line for delivery)
-    float countdownTimer;     // Level countdown timer (seconds)
-    float foodDecayRate;      // Food status decay rate per second (e.g., 1/90, 1/60, 1/40)
-    float initialTimer;       // Initial level countdown time (for calculating remaining time ratio)
+    int levelNumber;
+    float maxDistance;
+    float countdownTimer;
+    float foodDecayRate;
     std::vector<std::shared_ptr<GameObject>> objects;
 };
 
 
 class LevelManager {
 public:
-    // Score system
-    float currentLevelScore;    // Current level score
-    float totalScore;           // Total score (sum of all completed level scores)
-    int levelsCompleted;        // Number of completed levels
 
-    // C++11 random number generator
+    // Scores
+    float currentLevelScore;
+    float totalScore;
+    int levelsCompleted;
+
+    // Random number generator
     std::mt19937 rng;
 
     // Far and near background textures
@@ -42,13 +41,12 @@ public:
     Texture2D foreTexture;
     Texture2D roadblockTexture;
     Texture2D skatesTexture;
-    Texture2D catTexture;       // Stray cat texture
-    Texture2D gangsterTexture;  // Street gangster texture
-    Texture2D couponTexture;    // Coupon item texture
-    Texture2D blackBoxTexture;  // Black tech box texture
-    Texture2D droneTexture;     // Delivery drone item texture
+    Texture2D catTexture; 
+    Texture2D gangsterTexture; 
+    Texture2D couponTexture; 
+    Texture2D blackBoxTexture; 
+    Texture2D droneTexture;
 
-    // Screen and rendering dimension parameters
     int screenWidth;
     int screenHeight;
     float groundY;
@@ -63,37 +61,47 @@ public:
     float foreY;
     Color foreTint;
 
-    // Parallax scroll speeds (global fixed values)
     float backScrollSpeed;
     float foreScrollSpeed;
 
     // Currently running level data
     LevelConfig currentLevel;
 
-    // Constructor
+    // Initializes screen metrics, score trackers, and random number generator
     LevelManager(int sWidth, int sHeight, float gY);
     
-    // Set global parallax scroll speeds
+    // Set scroll speeds
     void SetParallaxScrollSpeed(float backSpeed, float foreSpeed)
     {
         backScrollSpeed = backSpeed;
         foreScrollSpeed = foreSpeed;
     }
     
-    // Load external background assets
+    // Loads texture files
     void LoadAssets();
     
-    // Unload external background assets
+    // Releases GPU texture memory upon game shutdown
     void UnloadAssets();
     
-    // Core functions implemented with switch-case
+    // Initializes level distance, decay rates, and put obstacles/items
     void SetupLevel(int levelNumber);
+
+    // Main render function for parallax backgrounds, street, active entities
     void Draw(float worldScrollOffset);
+
+    // Returns true if the player's world position reaches or exceeds maxDistance
     bool CheckWin(float worldScrollOffset);
-    void UpdateCountdown(float deltaTime); // Decrease countdown timer
-    void AddCountdownTime(float seconds); // Add time to countdown (used by Coupon)
-    void UpdateFoodDecay(float deltaTime, Player& player); // Decrease food status
+
+    // Decreases the current level countdown timer by deltaTime
+    void UpdateCountdown(float deltaTime);
     
+    // Increases countdown timer (coupon)
+    void AddCountdownTime(float seconds); 
+    
+    // Decreases player's food status based on level food decay rate
+    void UpdateFoodDecay(float deltaTime, Player& player); 
+    
+    // Renders status bar
     void DrawHUD(const Player& player, float worldScrollOffset);
     
     // Score calculation function

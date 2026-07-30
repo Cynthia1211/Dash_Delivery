@@ -10,7 +10,7 @@ public:
     // Constructor: creates black tech box at given position
     // x: X position, y: Y position in world coordinates (airborne items use GetVerticalMiddleY)
     BlackTechBox(float x, float y, Texture2D tex) 
-        : GameObject(x, y, 40.0f, 40.0f, ObjectType::BLACK_TECH_BOX, BLUE) {
+        : GameObject(x, y, 40.0f, 40.0f, ObjectType::BLACK_TECH_BOX) {
         texture = tex;
     }
 
@@ -25,7 +25,7 @@ public:
                 Rectangle{ 0, 0, (float)texture.width, (float)texture.height },
                 Rectangle{ screenX, screenY, width, height }, Vector2{ 0, 0 }, 0.0f, WHITE);
         } else {
-            DrawRectangle(screenX, screenY, width, height, color);
+            DrawRectangle(screenX, screenY, width, height, RED);
             DrawText("BLACK-TECH", screenX - 5, screenY - 15, 10, BLUE);
         }
     }

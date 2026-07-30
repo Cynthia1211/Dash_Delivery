@@ -10,7 +10,7 @@ public:
     // Constructor: creates stray cat at given position
     // x: X position, y: Y position in world coordinates (ground level = groundY)
     StrayCat(float x, float y, Texture2D tex) 
-        : GameObject(x, y, 40.0f, 40.0f, ObjectType::STRAY_CAT, ORANGE) {
+        : GameObject(x, y, 40.0f, 40.0f, ObjectType::STRAY_CAT) {
         texture = tex;
     }
 
@@ -25,7 +25,7 @@ public:
                 Rectangle{ 0, 0, (float)texture.width, (float)texture.height },
                 Rectangle{ screenX, screenY, width, height }, Vector2{ 0, 0 }, 0.0f, WHITE);
         } else {
-            DrawRectangle(screenX, screenY, width, height, color);
+            DrawRectangle(screenX, screenY, width, height, YELLOW);
             DrawText("CAT", screenX + 5, screenY + 10, 12, BLACK);
         }
     }
