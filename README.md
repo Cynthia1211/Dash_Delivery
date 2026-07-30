@@ -7,3 +7,4 @@ Ensure you have `raylib` installed. Run the following command in your terminal t
 
 ```bash
 clang++ *.cpp entities/*.cpp -std=c++17 -I/usr/local/include -L/usr/local/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo -framework AudioToolbox -o game
+
