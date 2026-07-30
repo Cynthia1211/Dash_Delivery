@@ -14,6 +14,11 @@ LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
     screenHeight = sHeight;
     groundY = gY;
 
+    // 初始化分数系统
+    currentLevelScore = 0.0f;
+    totalScore = 0.0f;
+    levelsCompleted = 0;
+
     // 初始化滤镜颜色
     backTint = { 200, 200, 200, 100 };
     foreTint = { 255, 255, 255, 255 };
@@ -67,6 +72,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             // ------- 第一关配置 -------
             currentLevel.maxDistance = 2000.0f;     // 关卡总长度2000米
             currentLevel.countdownTimer = 90.0f;   // 第一关：90秒倒计时
+            currentLevel.initialTimer = 90.0f;     // 保存初始时间
             currentLevel.foodDecayRate = 1.0f/100.0f;   // 食物每秒掉落 1/90
             
             // 每600米处生成 roadblock (600m, 1200m) — 地面道具
@@ -95,6 +101,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             // ------- 第二关配置 -------
             currentLevel.maxDistance = 5000.0f;     // 关卡总长度5000米
             currentLevel.countdownTimer = 40.0f;   // 第二关：40秒倒计时
+            currentLevel.initialTimer = 40.0f;     // 保存初始时间
             currentLevel.foodDecayRate = 1.0f/100.0f;   // 食物每秒掉落 1/60
             
             std::uniform_int_distribution<int> groundObjDist(0, 2);
@@ -136,6 +143,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             // ------- 第三关配置 -------
             currentLevel.maxDistance = 4000.0f;     // 关卡总长度4000米
             currentLevel.countdownTimer = 30.0f;   // 第三关：30秒倒计时
+            currentLevel.initialTimer = 30.0f;     // 保存初始时间
             currentLevel.foodDecayRate = 1.0f/70.0f;   // 食物每秒掉落 1/40
             
             const float groundObjY3 = groundY - 50.0f;
@@ -256,6 +264,12 @@ void LevelManager::UpdateFoodDecay(float deltaTime, Player& player) {
     }
 }
 
+// 分数计算函数
+// 算法: 剩余时间秒 * 10 * 食物完整度 * 当前关卡数
+float LevelManager::CalculateScore(float remainingTime, float foodCompleteness) {
+    return remainingTime * 10.0f * foodCompleteness * (float)currentLevel.levelNumber;
+}
+
 // ======= HUD 绘制函数 =======
 void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
     // 1. 绘制顶部半透明灰色背景条 (宽度 800, 高度 80 - 加高以容纳更多内容)
@@ -288,17 +302,20 @@ void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
     DrawText(TextFormat("%ds", (int)currentLevel.countdownTimer), countdownX + 55, 20, 18, timeColor);
     
     // --- 第二行内容 (y=48) ---
-    // 5. 显示 Food Status 食物状态血条 (放在第一行下方)
-    DrawText("FOOD:", 20, 48, 16, WHITE);
-    DrawRectangle(70, 50, 150, 16, MAROON); // 血条暗红底槽
+    // 5. 显示当前总分
+    DrawText(TextFormat("SCORE: %.0f", totalScore), 20, 48, 16, GOLD);
+    
+    // 6. 显示 Food Status 食物状态血条 (放在第一行下方)
+    DrawText("FOOD:", 250, 48, 16, WHITE);
+    DrawRectangle(300, 50, 150, 16, MAROON); // 血条暗红底槽
     
     float barWidth = (player.foodStatus / 100.0f) * 150.0f;
     if (barWidth < 0) barWidth = 0;
-    DrawRectangle(70, 50, (int)barWidth, 16, RED); // 鲜红当前血量
-    DrawText(TextFormat("%.0f%%", player.foodStatus), 120, 52, 12, WHITE);
+    DrawRectangle(300, 50, (int)barWidth, 16, RED); // 鲜红当前血量
+    DrawText(TextFormat("%.0f%%", player.foodStatus), 350, 52, 12, WHITE);
     
-    // 6. 显示生效中的道具 Buff (放在食物条右侧)
-    int buffX = 280; // Buff 标志起始横坐标
+    // 7. 显示生效中的道具 Buff (放在食物条右侧)
+    int buffX = 480; // Buff 标志起始横坐标
     
     // 检查恶猫减速效果计时器
     if (player.catDebuffTimer > 0) {

@@ -22,12 +22,18 @@ struct LevelConfig {
     float maxDistance;        // 关卡总长度（快递送达的终点线）
     float countdownTimer;     // 关卡倒计时时间（秒）
     float foodDecayRate;      // 食物完整度每秒掉落速率 (例如 1/90, 1/60, 1/40)
+    float initialTimer;       // 关卡初始倒计时时间（用于计算剩余时间比例）
     std::vector<std::shared_ptr<GameObject>> objects;
 };
 
 
 class LevelManager {
 public:
+    // 分数系统
+    float currentLevelScore;    // 当前关卡得分
+    float totalScore;           // 总分数（所有已完成关卡得分之和）
+    int levelsCompleted;        // 已完成的关卡数
+
     // C++11 随机数生成器
     std::mt19937 rng;
 
@@ -89,6 +95,9 @@ public:
     void UpdateFoodDecay(float deltaTime, Player& player); // 食物完整度递减
     
     void DrawHUD(const Player& player, float worldScrollOffset);
+    
+    // 分数计算函数
+    float CalculateScore(float remainingTime, float foodCompleteness);
     
     // 获取随机整数 (0 到 max-1)
     int GetRandomInt(int max) {

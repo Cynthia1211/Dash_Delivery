@@ -136,6 +136,13 @@ int main() {
             float playerWorldX = pWorldX;
             if (playerWorldX + player.radius >= level.currentLevel.maxDistance) {
                 player.shieldActive = false;  // 过关时重置护盾
+                
+                // 计算当前关卡得分: 剩余时间 * 10 * 食物完整度 * 当前关卡数
+                float foodCompleteness = player.foodStatus / 100.0f; // 0-1范围
+                level.currentLevelScore = level.CalculateScore(level.currentLevel.countdownTimer, foodCompleteness);
+                level.totalScore += level.currentLevelScore;
+                level.levelsCompleted++;
+                
                 if (currentStage < 3) {
                     // 如果还没到第 3 关，进入关卡过渡状态
                     gameState = 1; 
@@ -184,21 +191,26 @@ int main() {
         else if (gameState == 1) {
             // 关卡通过，等待自动开启下一关的黑色半透明遮罩
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 150 });
-            DrawText(TextFormat("STAGE %d CLEAR!", currentStage), 260, 180, 40, GREEN);
-            DrawText(TextFormat("Next Stage starts in %d seconds...", (int)stageTransitionTimer), 240, 240, 20, WHITE);
+            DrawText(TextFormat("STAGE %d CLEAR!", currentStage), 260, 140, 40, GREEN);
+            DrawText(TextFormat("Stage Score: %.0f", level.currentLevelScore), 280, 190, 24, GOLD);
+            DrawText(TextFormat("Total Score: %.0f", level.totalScore), 280, 230, 24, GOLD);
+            DrawText(TextFormat("Next Stage starts in %d seconds...", (int)stageTransitionTimer), 240, 280, 20, WHITE);
         } 
         else if (gameState == 2) {
-            // 最终大通关
+            // 最终大通关 - 显示三关总分
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 200 });
-            DrawText("CONGRATULATIONS!", 180, 160, 40, GOLD);
-            DrawText("You Delivered All Orders On Time!", 200, 220, 20, WHITE);
+            DrawText("CONGRATULATIONS!", 180, 120, 40, GOLD);
+            DrawText("You Delivered All Orders On Time!", 200, 170, 20, WHITE);
+            DrawText(TextFormat("FINAL SCORE: %.0f", level.totalScore), 250, 230, 32, GOLD);
+            DrawText(TextFormat("Levels Completed: %d/3", level.levelsCompleted), 290, 280, 20, WHITE);
         }
         else if (gameState == 3) {
             // 任务失败
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 200 });
-            DrawText("MISSION FAILED", 210, 160, 40, RED);
-            DrawText("Food status dropped to 0%!", 240, 220, 20, WHITE);
-            DrawText("Press R to Restart", 290, 260, 20, LIGHTGRAY);
+            DrawText("MISSION FAILED", 210, 140, 40, RED);
+            DrawText("Food status dropped to 0%!", 240, 190, 20, WHITE);
+            DrawText(TextFormat("Final Score: %.0f", level.totalScore), 280, 230, 24, GOLD);
+            DrawText("Press R to Restart", 290, 270, 20, LIGHTGRAY);
 
             if (IsKeyPressed(KEY_R)) {
                 currentStage = 1;
@@ -211,6 +223,9 @@ int main() {
                 player.droneTimer = 0.0f;
                 player.catDebuffTimer = 0.0f;
                 player.shieldActive = false;      // 重置护盾
+                level.totalScore = 0.0f;          // 重置总分
+                level.levelsCompleted = 0;        // 重置完成关卡数
+                level.currentLevelScore = 0.0f;   // 重置当前关卡分数
                 level.SetupLevel(currentStage);
                 gameState = 0;
             }
