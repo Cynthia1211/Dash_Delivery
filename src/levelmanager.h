@@ -19,9 +19,8 @@ struct LevelObject {
 struct LevelConfig {
     int levelNumber;          // 关卡编号（1, 2, 3）
     float maxDistance;        // 关卡总长度（快递送达的终点线）
-    float backScrollSpeed;    // 远景滚动系数（例如第一关 0.1，后面越来越快）
-    float foreScrollSpeed;    // 近景滚动系数（例如第一关 0.5）
     float countdownTimer;     // 关卡倒计时时间（秒）
+    float foodDecayRate;      // 食物完整度每秒掉落速率 (例如 1/90, 1/60, 1/40)
     std::vector<std::shared_ptr<GameObject>> objects;
 };
 
@@ -54,11 +53,22 @@ public:
     float foreY;
     Color foreTint;
 
+    // 视差滚动速度 (全局固定)
+    float backScrollSpeed;
+    float foreScrollSpeed;
+
     // 【新增】当前正在运行的关卡数据
     LevelConfig currentLevel;
 
     // 构造函数
     LevelManager(int sWidth, int sHeight, float gY);
+    
+    // 设置全局视差滚动速度
+    void SetParallaxScrollSpeed(float backSpeed, float foreSpeed)
+    {
+        backScrollSpeed = backSpeed;
+        foreScrollSpeed = foreSpeed;
+    }
     
     // 加载外部背景素材
     void LoadAssets();
@@ -72,6 +82,7 @@ public:
     bool CheckWin(float worldScrollOffset);
     void UpdateCountdown(float deltaTime); // 倒计时递减
     void AddCountdownTime(float seconds); // 增加倒计时时间（供Coupon使用）
+    void UpdateFoodDecay(float deltaTime, Player& player); // 食物完整度递减
     
     void DrawHUD(const Player& player, float worldScrollOffset);
 };

@@ -24,9 +24,9 @@ void Player::ActivateSkates(float duration) {
 
 void Player::ActivateDrone(float duration) {
     droneTimer = duration; // 设置无人机飞行倒计时为 5.0f 秒
-    // 将玩家位置移到画面 1/3 处（从底部向上1/3的高度）
-    // 即离地面约 2/3 高度的空中位置
-    pos.y = groundY - radius - (groundY * 0.33f);
+    // 将玩家位置移到画面 1/4 处（从底部向上1/4的高度）
+    // 即离地面约 3/4 高度的空中位置
+    pos.y = groundY - radius - (groundY * 0.6f);
     isGrounded = false; // 设置为非地面状态
     velocity.y = 0.0f;  // 重置垂直速度
 }

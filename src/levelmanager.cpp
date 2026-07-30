@@ -16,7 +16,6 @@ LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
     // 初始化滤镜颜色
     backTint = { 200, 200, 200, 100 };
     foreTint = { 255, 255, 255, 255 };
-    
 }
 
 void LevelManager::LoadAssets() {
@@ -61,48 +60,95 @@ void LevelManager::SetupLevel(int levelNumber) {
     switch (levelNumber) {
         case 1:
             // ------- 第一关配置 -------
-            currentLevel.maxDistance = 2000.0f;     // 关卡长度
-            currentLevel.backScrollSpeed = 0.1f;    // 视差速度
-            currentLevel.foreScrollSpeed = 0.5f;
-            currentLevel.countdownTimer = 30.0f;   // 第一关：90秒倒计时
-            currentLevel.objects.push_back(std::make_shared<BlackTechBox>(500.0f, blackBoxTexture));    // 500米处：黑市技术盒（护盾）
-            currentLevel.objects.push_back(std::make_shared<Roadblock>(700.0f, roadblockTexture));     // 700米处：围栏
-            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(900.0f, droneTexture));     // 900米处：配送无人机
-            currentLevel.objects.push_back(std::make_shared<Skates>(1200.0f, skatesTexture)); 
-            currentLevel.objects.push_back(std::make_shared<Coupon>(1500.0f, couponTexture, *this, 15.0f)); // 优惠券：增加15秒
+            currentLevel.maxDistance = 2000.0f;     // 关卡总长度2000米
+            currentLevel.countdownTimer = 90.0f;   // 第一关：90秒倒计时
+            currentLevel.foodDecayRate = 1.0f/90.0f;   // 食物每秒掉落 1/90
+            
+            // 每600米处生成 roadblock (600m, 1200m)
+            for (float x = 600.0f; x < 2000.0f; x += 600.0f) {
+                currentLevel.objects.push_back(std::make_shared<Roadblock>(x, roadblockTexture));
+            }
+            
+            // 每800米处随机出现 skates, coupon, blackTechbox (800m, 1600m)
+            for (float x = 800.0f; x < 2000.0f; x += 800.0f) {
+                int randomChoice = rand() % 3;
+                if (randomChoice == 0) {
+                    currentLevel.objects.push_back(std::make_shared<Skates>(x, skatesTexture));
+                } else if (randomChoice == 1) {
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, couponTexture, *this, 15.0f));
+                } else {
+                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, blackBoxTexture));
+                }
+            }
 
             break;
 
         case 2:
             // ------- 第二关配置 -------
-            currentLevel.maxDistance = 4000.0f;
-            currentLevel.backScrollSpeed = 0.15f;   // 速度稍微加快
-            currentLevel.foreScrollSpeed = 0.7f;
-            currentLevel.countdownTimer = 25.0f;   // 第二关：75秒倒计时
-
-            // 【新写法】摆放真实的敌人
-            currentLevel.objects.push_back(std::make_shared<StreetGangster>(500.0f, gangsterTexture)); // 500米处有流氓
-            currentLevel.objects.push_back(std::make_shared<BlackTechBox>(1000.0f, blackBoxTexture));    // 1000米处有黑市技术盒
-            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(1300.0f, droneTexture));    // 1300米处：配送无人机
-            currentLevel.objects.push_back(std::make_shared<StrayCat>(1500.0f, catTexture));          // 1500米处有恶猫
-            currentLevel.objects.push_back(std::make_shared<Skates>(2500.0f, skatesTexture));          // 2500米处有旱冰鞋
+            currentLevel.maxDistance = 5000.0f;     // 关卡总长度5000米
+            currentLevel.countdownTimer = 40.0f;   // 第二关：40秒倒计时
+            currentLevel.foodDecayRate = 1.0f/60.0f;   // 食物每秒掉落 1/60
+            
+            // 每600米处随机出现 straycat, streetgangster, roadblock
+            for (float x = 600.0f; x < 5000.0f; x += 600.0f) {
+                int randomChoice = rand() % 3;
+                if (randomChoice == 0) {
+                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, catTexture));
+                } else if (randomChoice == 1) {
+                    currentLevel.objects.push_back(std::make_shared<StreetGangster>(x, gangsterTexture));
+                } else {
+                    currentLevel.objects.push_back(std::make_shared<Roadblock>(x, roadblockTexture));
+                }
+            }
+            
+            // 每800米处随机出现 skates, coupon, blackTechbox
+            for (float x = 800.0f; x < 5000.0f; x += 800.0f) {
+                int randomChoice = rand() % 3;
+                if (randomChoice == 0) {
+                    currentLevel.objects.push_back(std::make_shared<Skates>(x, skatesTexture));
+                } else if (randomChoice == 1) {
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, couponTexture, *this, 15.0f));
+                } else {
+                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, blackBoxTexture));
+                }
+            }
+            
+            // 3300米处放置 deliveryDrone
+            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(3300.0f, droneTexture));
             break;
 
         case 3:
             // ------- 第三关配置 -------
-            currentLevel.maxDistance = 6000.0f;
-            currentLevel.backScrollSpeed = 0.2f;    // 极速飙车
-            currentLevel.foreScrollSpeed = 0.9f;
-            currentLevel.countdownTimer = 30.0f;   // 第三关：60秒倒计时
-
-            // 【新写法】用循环在第三关每隔600米交替生成流氓和恶猫
-            for (float x = 800.0f; x < 5500.0f; x += 600.0f) {
-                if ((int)x % 1200 == 0) {
+            currentLevel.maxDistance = 4000.0f;     // 关卡总长度4000米
+            currentLevel.countdownTimer = 30.0f;   // 第三关：30秒倒计时
+            currentLevel.foodDecayRate = 1.0f/40.0f;   // 食物每秒掉落 1/40
+            
+            // 每500米处随机出现 straycat, streetgangster, roadblock
+            for (float x = 500.0f; x < 4000.0f; x += 500.0f) {
+                int randomChoice = rand() % 3;
+                if (randomChoice == 0) {
+                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, catTexture));
+                } else if (randomChoice == 1) {
                     currentLevel.objects.push_back(std::make_shared<StreetGangster>(x, gangsterTexture));
                 } else {
-                    currentLevel.objects.push_back(std::make_shared<StrayCat>(x, catTexture));
+                    currentLevel.objects.push_back(std::make_shared<Roadblock>(x, roadblockTexture));
                 }
             }
+            
+            // 每800米处随机出现 skates, coupon, blackTechbox
+            for (float x = 800.0f; x < 4000.0f; x += 800.0f) {
+                int randomChoice = rand() % 3;
+                if (randomChoice == 0) {
+                    currentLevel.objects.push_back(std::make_shared<Skates>(x, skatesTexture));
+                } else if (randomChoice == 1) {
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, couponTexture, *this, 15.0f));
+                } else {
+                    currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, blackBoxTexture));
+                }
+            }
+            
+            // 2700米处放置 deliveryDrone
+            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(2700.0f, droneTexture));
             break;
 
         // 万一以后你们想加第 4 关，直接在这里写：
@@ -119,7 +165,7 @@ void LevelManager::Draw(float worldScrollOffset) {
     // ==========================================
     // 1. 远景滚动计算（使用图片实际渲染宽度 backRenderWidth 取模）
     // ==========================================
-    float backBgScroll = -(worldScrollOffset * currentLevel.backScrollSpeed);
+    float backBgScroll = -(worldScrollOffset * backScrollSpeed);
     // 使用 fmodf 对浮点数取模，防止转成 int 丢失精度导致卡顿
     backBgScroll = fmodf(backBgScroll, backRenderWidth); 
     if (backBgScroll > 0) backBgScroll -= backRenderWidth;
@@ -132,7 +178,7 @@ void LevelManager::Draw(float worldScrollOffset) {
     // ==========================================
     // 2. 近景滚动计算（使用图片实际渲染宽度 foreRenderWidth 取模）
     // ==========================================
-    float foreBgScroll = -(worldScrollOffset * currentLevel.foreScrollSpeed);
+    float foreBgScroll = -(worldScrollOffset * foreScrollSpeed);
     foreBgScroll = fmodf(foreBgScroll, foreRenderWidth);
     if (foreBgScroll > 0) foreBgScroll -= foreRenderWidth;
 
@@ -179,6 +225,14 @@ void LevelManager::UpdateCountdown(float deltaTime) {
 // 给Coupon使用的接口：增加倒计时时间
 void LevelManager::AddCountdownTime(float seconds) {
     currentLevel.countdownTimer += seconds;
+}
+
+// 食物完整度递减函数
+void LevelManager::UpdateFoodDecay(float deltaTime, Player& player) {
+    player.foodStatus -= currentLevel.foodDecayRate * deltaTime * 100.0f;
+    if (player.foodStatus < 0.0f) {
+        player.foodStatus = 0.0f;
+    }
 }
 
 // ======= HUD 绘制函数 =======

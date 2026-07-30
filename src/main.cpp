@@ -2,6 +2,9 @@
 #include "entities/Player.h"
 #include "levelmanager.h"
 
+// 背景音乐
+Music backgroundMusic;
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 450;
 const float GRAVITY = 1500.0f;     
@@ -9,9 +12,20 @@ const float JUMP_FORCE = -600.0f;
 const float MOVE_SPEED = 300.0f;  
 const float GROUND_Y = 350.0f;
 
+// 全局视差滚动速度 (所有关卡共用)
+const float BACK_SCROLL_SPEED = 0.1f;
+const float FORE_SCROLL_SPEED = 0.5f;
+
 int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dash Delivery - Modular Architecture");
     SetTargetFPS(60);
+
+    // 初始化音频设备
+    InitAudioDevice();
+
+    // 加载并循环播放背景音乐 (LoadMusicStream 默认就是循环播放)
+    backgroundMusic = LoadMusicStream("../assets/backgroundSond.mp3");
+    PlayMusicStream(backgroundMusic);
 
     // 实例化模块
     Player player;
@@ -27,6 +41,7 @@ int main() {
     float stageTransitionTimer = 0.0f;
 
     LevelManager level(SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_Y);
+    level.SetParallaxScrollSpeed(BACK_SCROLL_SPEED, FORE_SCROLL_SPEED); // 设置全局视差滚动速度
     level.LoadAssets();
     level.SetupLevel(currentStage);
 
@@ -35,6 +50,9 @@ int main() {
 
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
+
+        // 更新背景音乐流
+        UpdateMusicStream(backgroundMusic);
 
         // =================================================================
         // 【核心逻辑控制】根据 gameState 分流
@@ -47,6 +65,7 @@ int main() {
             // 1. 先更新计时器
             player.UpdateTimers(deltaTime);
             level.UpdateCountdown(deltaTime); // 更新关卡倒计时
+            level.UpdateFoodDecay(deltaTime, player); // 更新食物完整度递减
 
             // 1. 玩家输入控制与物理更新
             player.HandleInput(MOVE_SPEED, JUMP_FORCE);
@@ -135,6 +154,7 @@ int main() {
                 player.pos.y = GROUND_Y - player.radius;
                 player.velocity = { 0.0f, 0.0f }; // 速度清零
                 player.isGrounded = true;
+                player.foodStatus = 100.0f;       // 重置食物完整度
                 player.shieldActive = false;      // 重置护盾
                 
                 level.SetupLevel(currentStage);   // 核心：一键加载新关卡的数据（速度、天气、障碍物、倒计时）
@@ -196,6 +216,13 @@ int main() {
         EndDrawing();
     }
     
+    // 停止并卸载背景音乐
+    StopMusicStream(backgroundMusic);
+    UnloadMusicStream(backgroundMusic);
+    
+    // 关闭音频设备
+    CloseAudioDevice();
+
     // 清理资源
     UnloadTexture(player.texture);
     level.UnloadAssets();
