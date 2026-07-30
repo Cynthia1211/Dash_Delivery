@@ -1,5 +1,6 @@
 #include "levelmanager.h"
 #include <cmath>
+#include <random>
 #include "entities/Roadblock.h"
 #include "entities/Skates.h"
 #include "entities/Coupon.h"          // <-- 【新增】优惠券道具
@@ -16,6 +17,10 @@ LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
     // 初始化滤镜颜色
     backTint = { 200, 200, 200, 100 };
     foreTint = { 255, 255, 255, 255 };
+    
+    // 初始化 C++11 随机数生成器
+    std::random_device rd;
+    rng = std::mt19937(rd());
 }
 
 void LevelManager::LoadAssets() {
@@ -72,8 +77,9 @@ void LevelManager::SetupLevel(int levelNumber) {
             
             // 每800米处随机出现 skates, coupon, blackTechbox (800m, 1600m) — 空中道具
             const float airObjY = GameObject::GetVerticalMiddleY(30.0f, screenHeight); // 30是道具高度
+            std::uniform_int_distribution<int> airObjDist(0, 2);
             for (float x = 800.0f; x < 2000.0f; x += 700.0f) {
-                int randomChoice = rand() % 3;
+                int randomChoice = airObjDist(rng);
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY, skatesTexture));
                 } else if (randomChoice == 1) {
@@ -91,12 +97,15 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.countdownTimer = 40.0f;   // 第二关：40秒倒计时
             currentLevel.foodDecayRate = 1.0f/100.0f;   // 食物每秒掉落 1/60
             
+            std::uniform_int_distribution<int> groundObjDist(0, 2);
+            std::uniform_int_distribution<int> airObjDist(0, 2);
+            
             const float groundObjY2 = groundY - 50.0f;
             const float airObjY2 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
             
             // 每600米处随机出现 straycat, streetgangster, roadblock (地面道具)
             for (float x = 500.0f; x < 5000.0f; x += 600.0f) {
-                int randomChoice = rand() % 3;
+                int randomChoice = groundObjDist(rng);
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<StrayCat>(x, groundObjY2, catTexture));
                 } else if (randomChoice == 1) {
@@ -108,7 +117,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             
             // 每800米处随机出现 skates, coupon, blackTechbox (空中道具)
             for (float x = 800.0f; x < 5000.0f; x += 700.0f) {
-                int randomChoice = rand() % 3;
+                int randomChoice = airObjDist(rng);
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY2, skatesTexture));
                 } else if (randomChoice == 1) {
@@ -133,8 +142,10 @@ void LevelManager::SetupLevel(int levelNumber) {
             const float airObjY3 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
             
             // 每500米处随机出现 straycat, streetgangster, roadblock (地面道具)
+            std::uniform_int_distribution<int> groundObjDist3(0, 2);
+            std::uniform_int_distribution<int> airObjDist3(0, 2);
             for (float x = 400.0f; x < 4000.0f; x += 500.0f) {
-                int randomChoice = rand() % 3;
+                int randomChoice = groundObjDist3(rng);
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<StrayCat>(x, groundObjY3, catTexture));
                 } else if (randomChoice == 1) {
@@ -146,7 +157,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             
             // 每800米处随机出现 skates, coupon, blackTechbox (空中道具)
             for (float x = 800.0f; x < 4000.0f; x += 700.0f) {
-                int randomChoice = rand() % 3;
+                int randomChoice = airObjDist3(rng);
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY3, skatesTexture));
                 } else if (randomChoice == 1) {

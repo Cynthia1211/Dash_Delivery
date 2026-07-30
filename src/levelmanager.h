@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include <vector>
 #include <memory>
+#include <random>
 #include "entities/GameObject.h"
 #include "entities/Player.h"
 
@@ -27,6 +28,9 @@ struct LevelConfig {
 
 class LevelManager {
 public:
+    // C++11 随机数生成器
+    std::mt19937 rng;
+
     // 远景和近景纹理
     Texture2D backTexture;
     Texture2D foreTexture;
@@ -85,4 +89,10 @@ public:
     void UpdateFoodDecay(float deltaTime, Player& player); // 食物完整度递减
     
     void DrawHUD(const Player& player, float worldScrollOffset);
+    
+    // 获取随机整数 (0 到 max-1)
+    int GetRandomInt(int max) {
+        std::uniform_int_distribution<int> dist(0, max - 1);
+        return dist(rng);
+    }
 };
