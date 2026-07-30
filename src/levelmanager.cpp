@@ -62,7 +62,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             // ------- 第一关配置 -------
             currentLevel.maxDistance = 2000.0f;     // 关卡总长度2000米
             currentLevel.countdownTimer = 90.0f;   // 第一关：90秒倒计时
-            currentLevel.foodDecayRate = 1.0f/90.0f;   // 食物每秒掉落 1/90
+            currentLevel.foodDecayRate = 1.0f/100.0f;   // 食物每秒掉落 1/90
             
             // 每600米处生成 roadblock (600m, 1200m) — 地面道具
             const float groundObjY = groundY - 50.0f;
@@ -77,7 +77,7 @@ void LevelManager::SetupLevel(int levelNumber) {
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY, skatesTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY, couponTexture, *this, 15.0f));
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY, couponTexture, *this, 10.0f));
                 } else {
                     currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, airObjY, blackBoxTexture));
                 }
@@ -89,7 +89,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             // ------- 第二关配置 -------
             currentLevel.maxDistance = 5000.0f;     // 关卡总长度5000米
             currentLevel.countdownTimer = 40.0f;   // 第二关：40秒倒计时
-            currentLevel.foodDecayRate = 1.0f/60.0f;   // 食物每秒掉落 1/60
+            currentLevel.foodDecayRate = 1.0f/100.0f;   // 食物每秒掉落 1/60
             
             const float groundObjY2 = groundY - 50.0f;
             const float airObjY2 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
@@ -112,7 +112,7 @@ void LevelManager::SetupLevel(int levelNumber) {
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY2, skatesTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY2, couponTexture, *this, 15.0f));
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY2, couponTexture, *this, 10.0f));
                 } else {
                     currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, airObjY2, blackBoxTexture));
                 }
@@ -127,7 +127,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             // ------- 第三关配置 -------
             currentLevel.maxDistance = 4000.0f;     // 关卡总长度4000米
             currentLevel.countdownTimer = 30.0f;   // 第三关：30秒倒计时
-            currentLevel.foodDecayRate = 1.0f/40.0f;   // 食物每秒掉落 1/40
+            currentLevel.foodDecayRate = 1.0f/70.0f;   // 食物每秒掉落 1/40
             
             const float groundObjY3 = groundY - 50.0f;
             const float airObjY3 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
@@ -150,7 +150,7 @@ void LevelManager::SetupLevel(int levelNumber) {
                 if (randomChoice == 0) {
                     currentLevel.objects.push_back(std::make_shared<Skates>(x, airObjY3, skatesTexture));
                 } else if (randomChoice == 1) {
-                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY3, couponTexture, *this, 15.0f));
+                    currentLevel.objects.push_back(std::make_shared<Coupon>(x, airObjY3, couponTexture, *this, 10.0f));
                 } else {
                     currentLevel.objects.push_back(std::make_shared<BlackTechBox>(x, airObjY3, blackBoxTexture));
                 }
@@ -274,7 +274,7 @@ void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
     } else if (currentLevel.countdownTimer <= 30.0f) {
         timeColor = GOLD; // 最后30秒变金色
     }
-    DrawText(TextFormat("%.1fs", currentLevel.countdownTimer), countdownX + 55, 20, 18, timeColor);
+    DrawText(TextFormat("%ds", (int)currentLevel.countdownTimer), countdownX + 55, 20, 18, timeColor);
     
     // --- 第二行内容 (y=48) ---
     // 5. 显示 Food Status 食物状态血条 (放在第一行下方)
@@ -289,31 +289,31 @@ void LevelManager::DrawHUD(const Player& player, float worldScrollOffset) {
     // 6. 显示生效中的道具 Buff (放在食物条右侧)
     int buffX = 280; // Buff 标志起始横坐标
     
-    // 检查旱冰鞋道具计时器
-    if (player.skatesTimer > 0) {
-        DrawRectangle(buffX, 48, 90, 24, GOLD);
-        DrawText(TextFormat("SKATES %.1fs", player.skatesTimer), buffX + 5, 52, 11, BLACK);
-        buffX += 100;
-    }
-    
-    // 检查无人机道具计时器
-    if (player.droneTimer > 0) {
-        DrawRectangle(buffX, 48, 90, 24, BLUE);
-        DrawText(TextFormat("DRONE %.1fs", player.droneTimer), buffX + 5, 52, 11, WHITE);
-        buffX += 100;
-    }
-    
     // 检查恶猫减速效果计时器
     if (player.catDebuffTimer > 0) {
-        DrawRectangle(buffX, 48, 90, 24, DARKPURPLE);
-        DrawText(TextFormat("DEBUFF %.1fs", player.catDebuffTimer), buffX + 5, 52, 11, WHITE);
-        buffX += 100;
+        DrawRectangle(buffX, 48, 100, 24, DARKPURPLE);
+        DrawText(TextFormat("SPEED- %.1fs", player.catDebuffTimer), buffX + 5, 52, 10, WHITE);
+        buffX += 110;
+    }
+    
+    // 检查旱冰鞋道具计时器
+    if (player.skatesTimer > 0) {
+        DrawRectangle(buffX, 48, 100, 24, MAROON);
+        DrawText(TextFormat("SPEED+ %.1fs", player.skatesTimer), buffX + 5, 52, 10, WHITE);
+        buffX += 110;
     }
     
     // 检查黑市技术盒护盾
     if (player.shieldActive) {
-        DrawRectangle(buffX, 48, 110, 24, BLUE);
-        DrawText("SHIELD ACTIVE", buffX + 5, 52, 11, WHITE);
-        buffX += 120;
+        DrawRectangle(buffX, 48, 80, 24, BLUE);
+        DrawText("SHIELD", buffX + 5, 52, 11, WHITE);
+        buffX += 90;
+    }
+    
+    // 检查无人机道具计时器
+    if (player.droneTimer > 0) {
+        DrawRectangle(buffX, 48, 80, 24, GOLD);
+        DrawText("FLY", buffX + 5, 52, 11, BLACK);
+        buffX += 90;
     }
 }

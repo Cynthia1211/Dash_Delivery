@@ -36,7 +36,7 @@ public:
             DrawText("SKATES", screenX, screenY - 15, 10, GOLD);
         }
     }
-
+ 
     void OnCollision(Player& player) override {
         player.ActivateSkates(5.0f); // 触发玩家的加速，持续 5 秒
         isAlive = false;            // 道具被吃掉，不再可见和触发碰撞

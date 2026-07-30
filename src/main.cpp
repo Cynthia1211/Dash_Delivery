@@ -183,7 +183,7 @@ int main() {
             // 关卡通过，等待自动开启下一关的黑色半透明遮罩
             DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 0, 0, 0, 150 });
             DrawText(TextFormat("STAGE %d CLEAR!", currentStage), 260, 180, 40, GREEN);
-            DrawText(TextFormat("Next Stage starts in %.1f seconds...", stageTransitionTimer), 240, 240, 20, WHITE);
+            DrawText(TextFormat("Next Stage starts in %d seconds...", (int)stageTransitionTimer), 240, 240, 20, WHITE);
         } 
         else if (gameState == 2) {
             // 最终大通关

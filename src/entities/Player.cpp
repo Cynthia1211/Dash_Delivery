@@ -36,7 +36,7 @@ void Player::HandleInput(float moveSpeed, float jumpForce) {
 
     float currentSpeed = baseMoveSpeed;
     if (skatesTimer > 0) currentSpeed *= 1.25f; // 旱冰鞋加成 [cite: 40]
-    if (catDebuffTimer > 0) currentSpeed *= 0.5f; // 恶猫减速效果
+    if (catDebuffTimer > 0) currentSpeed *= 0.75f; // 恶猫减速15%效果
     
     if (IsKeyDown(KEY_LEFT)) {
         velocity.x = -currentSpeed;
