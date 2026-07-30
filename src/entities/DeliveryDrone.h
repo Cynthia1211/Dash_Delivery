@@ -1,16 +1,18 @@
-// Skates.h (旱冰鞋道具)
+// DeliveryDrone.h - 配送无人机道具：拾取后玩家飞到空中1/3位置，持续5秒
 #pragma once
 #include "GameObject.h"
 #include "../entities/Player.h"
 
-class Skates : public GameObject {
+class DeliveryDrone : public GameObject {
 public:
-    Texture2D texture; // 存储固定的旱冰鞋图片
+    Texture2D texture; // 存储无人机图片
+    float duration;    // 飞行持续时间（秒）
 
-    // 构造函数：增加 Texture2D 参数
-    Skates(float x, Texture2D tex) 
-        : GameObject(x, 30.0f, 30.0f, ObjectType::SKATES, GOLD) {
+    // 构造函数
+    DeliveryDrone(float x, Texture2D tex) 
+        : GameObject(x, 30.0f, 30.0f, ObjectType::DRONE, BLUE) {
         texture = tex;
+        duration = 5.0f;
     }
 
     // 重写 Draw 方法 - 使用屏幕垂直中间位置
@@ -20,7 +22,7 @@ public:
         float screenX = worldX - worldScrollOffset;
         float screenY = screenHeight > 0 ? GetVerticalMiddleY(height, screenHeight) : groundY - height + 40.0f;
 
-        // 如果图片有效，就画图；否则画金色方块和文字兜底
+        // 如果图片有效，就画图；否则画蓝色方块和文字兜底
         if (texture.id > 0) {
             DrawTexturePro(
                 texture,
@@ -32,12 +34,13 @@ public:
             );
         } else {
             DrawRectangle(screenX, screenY, width, height, color);
-            DrawText("SKATES", screenX, screenY - 15, 10, GOLD);
+            DrawText("DRONE", screenX, screenY - 15, 10, BLUE);
         }
     }
 
+    // 碰撞后：让玩家飞到空中并持续5秒
     void OnCollision(Player& player) override {
-        player.ActivateSkates(5.0f); // 触发玩家的加速，持续 5 秒
-        isAlive = false;            // 道具被吃掉，不再可见和触发碰撞
+        player.ActivateDrone(duration);
+        isAlive = false; // 道具被拾取后消失
     }
 };

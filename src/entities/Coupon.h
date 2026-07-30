@@ -17,13 +17,12 @@ public:
         levelManager = &lm;
     }
 
-    // 重写 Draw 方法
-    void Draw(float worldScrollOffset, float groundY) override {
+    // 重写 Draw 方法 - 使用屏幕垂直中间位置
+    void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) override {
         if (!isAlive) return;
 
         float screenX = worldX - worldScrollOffset;
-        float perspectiveOffsetY = 40.0f;
-        float screenY = groundY - height + perspectiveOffsetY;
+        float screenY = screenHeight > 0 ? GetVerticalMiddleY(height, screenHeight) : groundY - height + 40.0f;
 
         // 如果图片有效，就画图；否则画绿色方块和文字兜底
         if (texture.id > 0) {

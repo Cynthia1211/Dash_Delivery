@@ -3,6 +3,7 @@
 #include "entities/Roadblock.h"
 #include "entities/Skates.h"
 #include "entities/Coupon.h"          // <-- 【新增】优惠券道具
+#include "entities/DeliveryDrone.h"   // <-- 【新增】配送无人机道具
 #include "entities/StrayCat.h"       // <-- 【新增】
 #include "entities/StreetGangster.h" // <-- 【新增】
 #include "entities/BlackTechBox.h"   // <-- 【新增】黑市技术盒
@@ -23,6 +24,7 @@ void LevelManager::LoadAssets() {
     foreTexture = LoadTexture("../assets/foreground.png");
     roadblockTexture = LoadTexture("../assets/roadblock.png");
     skatesTexture = LoadTexture("../assets/skates.png");
+    droneTexture = LoadTexture("../assets/deliveryDrone.png");   // 【新增】无人机贴图
     catTexture = LoadTexture("../assets/cat.png");               // <-- 【新增】
     gangsterTexture = LoadTexture("../assets/gangster.png");
     couponTexture = LoadTexture("../assets/coupon.png");         // <-- 【新增】优惠券贴图
@@ -44,6 +46,7 @@ void LevelManager::UnloadAssets() {
     UnloadTexture(foreTexture);
     UnloadTexture(roadblockTexture);
     UnloadTexture(skatesTexture);
+    UnloadTexture(droneTexture);     // 【新增】无人机贴图
     UnloadTexture(catTexture);       // <-- 【新增】
     UnloadTexture(gangsterTexture);
     UnloadTexture(couponTexture);    // <-- 【新增】优惠券贴图
@@ -64,8 +67,9 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.countdownTimer = 30.0f;   // 第一关：90秒倒计时
             currentLevel.objects.push_back(std::make_shared<BlackTechBox>(500.0f, blackBoxTexture));    // 500米处：黑市技术盒（护盾）
             currentLevel.objects.push_back(std::make_shared<Roadblock>(700.0f, roadblockTexture));     // 700米处：围栏
+            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(900.0f, droneTexture));     // 900米处：配送无人机
             currentLevel.objects.push_back(std::make_shared<Skates>(1200.0f, skatesTexture)); 
-            currentLevel.objects.push_back(std::make_shared<Coupon>(900.0f, couponTexture, *this, 15.0f)); // 优惠券：增加15秒
+            currentLevel.objects.push_back(std::make_shared<Coupon>(1500.0f, couponTexture, *this, 15.0f)); // 优惠券：增加15秒
 
             break;
 
@@ -79,6 +83,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             // 【新写法】摆放真实的敌人
             currentLevel.objects.push_back(std::make_shared<StreetGangster>(500.0f, gangsterTexture)); // 500米处有流氓
             currentLevel.objects.push_back(std::make_shared<BlackTechBox>(1000.0f, blackBoxTexture));    // 1000米处有黑市技术盒
+            currentLevel.objects.push_back(std::make_shared<DeliveryDrone>(1300.0f, droneTexture));    // 1300米处：配送无人机
             currentLevel.objects.push_back(std::make_shared<StrayCat>(1500.0f, catTexture));          // 1500米处有恶猫
             currentLevel.objects.push_back(std::make_shared<Skates>(2500.0f, skatesTexture));          // 2500米处有旱冰鞋
             break;
@@ -147,7 +152,7 @@ void LevelManager::Draw(float worldScrollOffset) {
 
         if (screenX + obj->width > 0 && screenX < screenWidth) {
 
-            obj->Draw(worldScrollOffset, groundY);
+            obj->Draw(worldScrollOffset, groundY, screenHeight);
 
         }
     }

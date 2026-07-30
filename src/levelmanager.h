@@ -37,6 +37,7 @@ public:
     Texture2D gangsterTexture;  // <-- 【新增】流氓的贴图
     Texture2D couponTexture;    // <-- 【新增】优惠券的贴图
     Texture2D blackBoxTexture;  // 黑市技术盒贴图
+    Texture2D droneTexture;     // 【新增】配送无人机道具贴图
 
     // 屏幕和渲染尺寸参数
     int screenWidth;

@@ -22,6 +22,15 @@ void Player::ActivateSkates(float duration) {
     skatesTimer = duration; // 设置倒计时为 5.0f 秒
 }
 
+void Player::ActivateDrone(float duration) {
+    droneTimer = duration; // 设置无人机飞行倒计时为 5.0f 秒
+    // 将玩家位置移到画面 1/3 处（从底部向上1/3的高度）
+    // 即离地面约 2/3 高度的空中位置
+    pos.y = groundY - radius - (groundY * 0.33f);
+    isGrounded = false; // 设置为非地面状态
+    velocity.y = 0.0f;  // 重置垂直速度
+}
+
 void Player::HandleInput(float moveSpeed, float jumpForce) {
     velocity.x = 0.0f;
 
@@ -46,18 +55,34 @@ void Player::HandleInput(float moveSpeed, float jumpForce) {
 }
 
 void Player::UpdatePhysics(float deltaTime, float gravity, float groundY) {
-    // 应用重力
-    if (!isGrounded) {
-        velocity.y += gravity * deltaTime;
-    } else {
+    // 保存 groundY 供 ActivateDrone 使用
+    this->groundY = groundY;
+    
+    // 无人机飞行状态：在计时器期间不受重力影响，保持在空中
+    if (droneTimer > 0) {
+        // 飞行中：不受重力影响，保持空中位置
         velocity.y = 0.0f;
+        isGrounded = false;
+    } else {
+        // 正常重力
+        if (!isGrounded) {
+            velocity.y += gravity * deltaTime;
+        } else {
+            velocity.y = 0.0f;
+        }
     }
 
-    // 垂直方向位置更新与地面碰撞
+    // 垂直方向位置更新
     pos.y += velocity.y * deltaTime;
-    if (pos.y + radius >= groundY) {
-        pos.y = groundY - radius;
-        isGrounded = true;
+    
+    // 无人机计时器结束：玩家落地
+    if (droneTimer <= 0) {
+        // 正常地面碰撞
+        if (pos.y + radius >= groundY) {
+            pos.y = groundY - radius;
+            isGrounded = true;
+            velocity.y = 0.0f;
+        }
     }
 }
 

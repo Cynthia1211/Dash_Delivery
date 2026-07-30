@@ -14,7 +14,7 @@ public:
     }
 
     // 重写 Draw 方法
-    void Draw(float worldScrollOffset, float groundY) override {
+    void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) override {
         if (!isAlive) return;
 
         float screenX = worldX - worldScrollOffset;

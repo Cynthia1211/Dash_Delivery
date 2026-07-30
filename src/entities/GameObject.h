@@ -23,12 +23,17 @@ public:
     virtual void OnCollision(class Player& player) = 0; 
     
     // 自定义渲染逻辑（如果需要绘制特定的提示文字或图片）
-    virtual void Draw(float worldScrollOffset, float groundY) {
+    virtual void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) {
         if (!isAlive) return;
         float screenX = worldX - worldScrollOffset;
         float perspectiveOffsetY = 40.0f; // 保持你目前的视觉偏移
         float screenY = groundY - height + perspectiveOffsetY;
         
         DrawRectangle(screenX, screenY, width, height, color);
+    }
+
+    // 工具方法：计算屏幕垂直中间偏下位置的Y坐标（玩家跳跃可触及）
+    static float GetVerticalMiddleY(float height, int screenHeight) {
+        return screenHeight * 0.55f - height / 2.0f;
     }
 };

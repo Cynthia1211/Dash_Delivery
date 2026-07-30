@@ -16,6 +16,7 @@ public:
 
     float baseMoveSpeed = 300.0f;    // 基础移动速度
     float foodStatus = 100.0f; // 食物完整度 [cite: 18]
+    float groundY = 350.0f;  // 地面Y坐标（用于无人机道具）
 
     float skatesTimer = 0.0f;
     float droneTimer = 0.0f;
@@ -45,4 +46,5 @@ public:
 
     void UpdateTimers(float deltaTime); // 每帧用来更新倒计时的函数
     void ActivateSkates(float duration); // 吃到旱冰鞋时触发
+    void ActivateDrone(float duration); // 吃到无人机时触发
 };
