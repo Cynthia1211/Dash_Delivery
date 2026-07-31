@@ -17,7 +17,7 @@ const float BACK_SCROLL_SPEED = 0.1f;
 const float FORE_SCROLL_SPEED = 0.5f;
 
 int main() {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dash Delivery - Modular Architecture");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dash Delivery - Group3");
     SetTargetFPS(60);
 
     // Initialize audio device
