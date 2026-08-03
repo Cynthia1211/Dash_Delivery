@@ -166,6 +166,9 @@ int main() {
             player.isGrounded = true;
             player.foodStatus = 100.0f;       
             player.shieldActive = false; 
+            player.skatesTimer = 0.0f;
+            player.droneTimer = 0.0f;
+            player.catDebuffTimer = 0.0f;
             
             // Setup next level configuration and resume playing state
             level.SetupLevel(currentStage);  

@@ -32,7 +32,7 @@ public:
     // Handles collision with the player
     // Buff: Fly 5 s
     void OnCollision(Player& player) override {
-        player.ActivateSkates(5.0f); 
+        player.ActivateDrone(5.0f); 
         isAlive = false;     
     }
 };
