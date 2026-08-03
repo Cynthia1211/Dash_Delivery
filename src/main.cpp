@@ -20,17 +20,6 @@ int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Dash Delivery - Group3");
     SetTargetFPS(60);
 
-    // Initialize audio device
-    InitAudioDevice();
-
-    // Load and loop background music
-    backgroundMusic = LoadMusicStream("../assets/backgroundSond.mp3");
-    PlayMusicStream(backgroundMusic);
-
-    // Instantiate player module
-    Player player;
-    player.texture = LoadTexture("../assets/player.png");
-
     // Track current stage number
     int currentStage = 1;
 
@@ -40,13 +29,28 @@ int main() {
     // Timer for transition screen display
     float stageTransitionTimer = 0.0f;
 
+    // // Player position threshold to start camera scroll
+    const float CAMERA_TRIGGER_X = SCREEN_WIDTH / 3.0f;
+
+    // Accumulated world scroll distance
+    float worldScrollOffset = 0.0f;
+
+    // Initialize audio device
+    InitAudioDevice();
+
+    // Load and loop background music
+    backgroundMusic = LoadMusicStream("../assets/backgroundSond.mp3");
+    PlayMusicStream(backgroundMusic);
+
+    // Instantiate player
+    Player player;
+    player.texture = LoadTexture("../assets/player.png");
+
+    // Setup levels detail
     LevelManager level(SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_Y);
     level.SetParallaxScrollSpeed(BACK_SCROLL_SPEED, FORE_SCROLL_SPEED); 
     level.LoadAssets();
     level.SetupLevel(currentStage);
-
-    const float CAMERA_TRIGGER_X = SCREEN_WIDTH / 3.0f; 
-    float worldScrollOffset = 0.0f; 
 
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
@@ -54,9 +58,8 @@ int main() {
         // Update background music stream
         UpdateMusicStream(backgroundMusic);
 
-        // Main gameplay state
+        // Playing state: update player, physics, collisions, and game logic
         if (gameState == 0) {
-
 
             float deltaTime = GetFrameTime();
 
@@ -133,7 +136,8 @@ int main() {
                 
                 // Calculate current level score
                 float foodCompleteness = player.foodStatus / 100.0f; 
-                level.currentLevelScore = level.CalculateScore(level.currentLevel.countdownTimer, foodCompleteness);
+                level.currentLevelScore = 
+                    level.CalculateScore(level.currentLevel.countdownTimer, foodCompleteness);
                 level.totalScore += level.currentLevelScore;
                 level.levelsCompleted++;
                 
@@ -149,7 +153,7 @@ int main() {
                 }
             }
         } 
-        // Stage transition state
+        // Level transition state: wait for countdown before starting next level
         else if (gameState == 1) {
 
             // Countdown transition timer
@@ -232,8 +236,6 @@ int main() {
                 gameState = 0;
             }
         }
-
-        DrawLine(CAMERA_TRIGGER_X, 0, CAMERA_TRIGGER_X, GROUND_Y, LIGHTGRAY);
 
         EndDrawing();
     }

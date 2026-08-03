@@ -12,17 +12,18 @@ public:
         texture = tex;
     }
 
-    void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) override {
+    void Draw(float worldScrollOffset, float groundY, int screenHeight) override {
         if (!isAlive) return;
 
         float screenX = worldX - worldScrollOffset;
-        float screenY = screenHeight > 0 ? GetVerticalMiddleY(height, screenHeight) : groundY - height + 40.0f;
+        float screenY = GetVerticalMiddleY(height, screenHeight);
 
         if (texture.id > 0) {
             DrawTexturePro(
                 texture,
                 Rectangle{ 0, 0, (float)texture.width, (float)texture.height },
-                Rectangle{ screenX, screenY, width, height }, Vector2{ 0, 0 }, 0.0f, WHITE);
+                Rectangle{ screenX, screenY, width, height }, 
+                Vector2{ 0, 0 }, 0.0f, WHITE);
         } else {
             DrawRectangle(screenX, screenY, width, height, GOLD);
             DrawText("SKATES", screenX, screenY - 15, 10, GOLD);
@@ -32,7 +33,7 @@ public:
     // Handles collision with the player
     // Buff: Speed up 5s
     void OnCollision(Player& player) override {
-        player.ActivateSkates(5.0f); 
+        player.skatesTimer = 5.0f;
         isAlive = false;        
     }
 };

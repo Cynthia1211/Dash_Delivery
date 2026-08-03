@@ -112,10 +112,7 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.foodDecayRate = 1.0f/100.0f;
             
             std::uniform_int_distribution<int> groundObjDist(0, 2);
-            std::uniform_int_distribution<int> airObjDist(0, 2);
             const float groundObjY2 = groundY - 50.0f;
-            const float airObjY2 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
-            
             for (float x = 500.0f; x < 5000.0f; x += 600.0f) {
                 int randomChoice = groundObjDist(rng);
                 if (randomChoice == 0) {
@@ -127,6 +124,8 @@ void LevelManager::SetupLevel(int levelNumber) {
                 }
             }
             
+            std::uniform_int_distribution<int> airObjDist(0, 2);
+            const float airObjY2 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
             for (float x = 800.0f; x < 5000.0f; x += 700.0f) {
                 int randomChoice = airObjDist(rng);
                 if (randomChoice == 0) {
@@ -152,11 +151,8 @@ void LevelManager::SetupLevel(int levelNumber) {
             currentLevel.countdownTimer = 30.0f;
             currentLevel.foodDecayRate = 1.0f/70.0f;
             
-            const float groundObjY3 = groundY - 50.0f;
-            const float airObjY3 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
-            
             std::uniform_int_distribution<int> groundObjDist3(0, 2);
-            std::uniform_int_distribution<int> airObjDist3(0, 2);
+            const float groundObjY3 = groundY - 50.0f;
             for (float x = 400.0f; x < 4000.0f; x += 500.0f) {
                 int randomChoice = groundObjDist3(rng);
                 if (randomChoice == 0) {
@@ -167,7 +163,9 @@ void LevelManager::SetupLevel(int levelNumber) {
                     currentLevel.objects.push_back(std::make_shared<Roadblock>(x, groundObjY3, roadblockTexture));
                 }
             }
-            
+
+            std::uniform_int_distribution<int> airObjDist3(0, 2);
+            const float airObjY3 = GameObject::GetVerticalMiddleY(30.0f, screenHeight);
             for (float x = 800.0f; x < 4000.0f; x += 700.0f) {
                 int randomChoice = airObjDist3(rng);
                 if (randomChoice == 0) {

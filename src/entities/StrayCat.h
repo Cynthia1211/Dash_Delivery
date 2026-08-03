@@ -12,7 +12,7 @@ public:
         texture = tex;
     }
 
-    void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) override {
+    void Draw(float worldScrollOffset, float groundY, int screenHeight) override {
         if (!isAlive) return;
         float screenX = worldX - worldScrollOffset;
         float perspectiveOffsetY = 40.0f;
@@ -21,7 +21,8 @@ public:
         if (texture.id > 0) {
             DrawTexturePro(texture, 
                 Rectangle{ 0, 0, (float)texture.width, (float)texture.height },
-                Rectangle{ screenX, screenY, width, height }, Vector2{ 0, 0 }, 0.0f, WHITE);
+                Rectangle{ screenX, screenY, width, height }, 
+                Vector2{ 0, 0 }, 0.0f, WHITE);
         } else {
             DrawRectangle(screenX, screenY, width, height, YELLOW);
             DrawText("CAT", screenX + 5, screenY + 10, 12, BLACK);

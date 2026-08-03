@@ -2,7 +2,8 @@
 #include "raylib.h"
 
 
-enum class ObjectType { ROADBLOCK, SKATES, BLACK_TECH_BOX, COUPON, DRONE, STRAY_CAT, GANGSTER };
+enum class ObjectType { ROADBLOCK, SKATES, BLACK_TECH_BOX, 
+    COUPON, DRONE, STRAY_CAT, GANGSTER };
 
 class GameObject {
 public:

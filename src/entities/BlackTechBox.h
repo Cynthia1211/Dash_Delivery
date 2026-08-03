@@ -12,11 +12,11 @@ public:
         texture = tex;
     }
 
-    void Draw(float worldScrollOffset, float groundY, int screenHeight = 0) override {
+    void Draw(float worldScrollOffset, float groundY, int screenHeight) override {
         if (!isAlive) return;
 
         float screenX = worldX - worldScrollOffset;
-        float screenY = screenHeight > 0 ? GetVerticalMiddleY(height, screenHeight) : groundY - height + 40.0f;
+        float screenY = GetVerticalMiddleY(height, screenHeight);
 
         if (texture.id > 0) {
             DrawTexturePro(texture, 

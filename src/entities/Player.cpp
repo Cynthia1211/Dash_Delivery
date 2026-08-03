@@ -20,21 +20,6 @@ void Player::UpdateTimers(float deltaTime) {
     if (catDebuffTimer > 0) catDebuffTimer -= deltaTime;
 }
 
-// Enables the skate power-up for the given duration
-void Player::ActivateSkates(float duration) {
-    skatesTimer = duration; 
-}
-
-// Enables the drone power-up for the given duration
-void Player::ActivateDrone(float duration) {
-    droneTimer = duration;
-
-    // Put the player into the air
-    pos.y = groundY - radius - (groundY * 0.6f);
-    isGrounded = false; 
-    velocity.y = 0.0f; 
-}
-
 // Processes keyboard input for player movement
 // Arrow keys for movement and spacebar for jumping
 void Player::HandleInput(float moveSpeed, float jumpForce) {
@@ -71,6 +56,7 @@ void Player::UpdatePhysics(float deltaTime, float gravity, float groundY) {
     // Drone flight state
     if (droneTimer > 0) {
 
+        pos.y = groundY - radius - (groundY * 0.6f);
         velocity.y = 0.0f;
         isGrounded = false;
     } else {
@@ -99,11 +85,13 @@ void Player::UpdatePhysics(float deltaTime, float gravity, float groundY) {
 void Player::Draw() {
     
     // Define the source rectangle from the texture
-    Rectangle sourceRec = { 0.0f, 0.0f, (float)texture.width * facing, (float)texture.height };
+    Rectangle sourceRec = { 0.0f, 0.0f, (float)texture.width * facing, 
+        (float)texture.height };
     
     // Put player in the ground
     float perspectiveOffsetY = 40.0f;
-    Rectangle destRec = { pos.x - spriteWidth / 2.0f, pos.y  - spriteHeight + radius + perspectiveOffsetY, spriteWidth, spriteHeight };
+    Rectangle destRec = { pos.x - spriteWidth / 2.0f, pos.y  - spriteHeight 
+        + radius + perspectiveOffsetY, spriteWidth, spriteHeight };
     Vector2 origin = { 0.0f, 0.0f };
     
     DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, WHITE);
