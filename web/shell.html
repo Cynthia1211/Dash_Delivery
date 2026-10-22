@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101820">
+  <title>Dash Delivery</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #101820;
+      color: #f5f3e7;
+    }
+
+    body {
+      box-sizing: border-box;
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      place-items: center;
+    }
+
+    main {
+      width: min(100%, 960px);
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      color: #ffd166;
+    }
+
+    p {
+      margin: 8px 0 18px;
+      color: #c9d1d9;
+    }
+
+    .game-frame {
+      overflow: hidden;
+      border: 2px solid #ffd166;
+      border-radius: 12px;
+      background: #87ceeb;
+      box-shadow: 0 18px 60px #0008;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      outline: none;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Dash Delivery</h1>
+    <p>Use the left and right arrow keys to move, Space to jump, and Esc to exit.</p>
+    <div class="game-frame">
+      <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
+  </main>
+  <script>
+    var Module = {
+      canvas: document.getElementById("canvas")
+    };
+  </script>
+  {{{ SCRIPT }}}
+</body>
+</html>

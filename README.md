@@ -76,6 +76,36 @@ clang++ main.cpp levelmanager.cpp entities/Player.cpp \
 ./dash_delivery
 ```
 
+## Publish a Browser Version
+
+The GitHub Actions workflow builds the game as WebAssembly and deploys it to
+GitHub Pages whenever changes are pushed to `main`.
+
+To enable deployment:
+
+1. Open the repository's **Settings → Pages** on GitHub.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Push this workflow to the `main` branch, or run **Deploy game to GitHub Pages**
+   from the repository's **Actions** tab.
+
+After the workflow succeeds, GitHub Pages shows the game URL in **Settings → Pages**
+and in the deployment job. The browser build uses the same C++ game and preloads
+the assets; the desktop executable is not used by Pages.
+
+To build the browser version locally on macOS, install Emscripten and build
+raylib 5.5 for WebAssembly:
+
+```bash
+brew install emscripten
+git clone --depth 1 --branch 5.5 https://github.com/raysan5/raylib.git /tmp/raylib
+make PLATFORM=PLATFORM_WEB -C /tmp/raylib/src
+RAYLIB_SRC=/tmp/raylib/src bash scripts/build-web.sh
+python3 -m http.server 8000 -d dist
+```
+
+Open `http://localhost:8000` in a browser. The build output is in the ignored
+`dist/` directory.
+
 ## Course Project
 
 Created as a group project for **Game Engineering Principles**.

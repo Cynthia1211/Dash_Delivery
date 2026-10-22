@@ -1,4 +1,5 @@
 #include "levelmanager.h"
+#include "asset_paths.h"
 #include <cmath>
 #include <random>
 #include "entities/Roadblock.h"
@@ -30,15 +31,15 @@ LevelManager::LevelManager(int sWidth, int sHeight, float gY) {
 
 void LevelManager::LoadAssets() {
     // Load all texture assets for game objects
-    backTexture = LoadTexture("../assets/background.png");
-    foreTexture = LoadTexture("../assets/foreground.png");
-    roadblockTexture = LoadTexture("../assets/roadblock.png");
-    skatesTexture = LoadTexture("../assets/skates.png");
-    droneTexture = LoadTexture("../assets/deliveryDrone.png");
-    catTexture = LoadTexture("../assets/cat.png");
-    gangsterTexture = LoadTexture("../assets/gangster.png");
-    couponTexture = LoadTexture("../assets/coupon.png"); 
-    blackBoxTexture = LoadTexture("../assets/blackBox.png"); 
+    backTexture = LoadTexture(ASSET_PATH("background.png"));
+    foreTexture = LoadTexture(ASSET_PATH("foreground.png"));
+    roadblockTexture = LoadTexture(ASSET_PATH("roadblock.png"));
+    skatesTexture = LoadTexture(ASSET_PATH("skates.png"));
+    droneTexture = LoadTexture(ASSET_PATH("deliveryDrone.png"));
+    catTexture = LoadTexture(ASSET_PATH("cat.png"));
+    gangsterTexture = LoadTexture(ASSET_PATH("gangster.png"));
+    couponTexture = LoadTexture(ASSET_PATH("coupon.png"));
+    blackBoxTexture = LoadTexture(ASSET_PATH("blackBox.png"));
 
     float backHeight = screenHeight / 1.0f; 
     backScale = backHeight / (float)backTexture.height;

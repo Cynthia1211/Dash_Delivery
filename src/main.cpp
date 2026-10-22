@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "entities/Player.h"
 #include "levelmanager.h"
+#include "asset_paths.h"
 
 // Background music
 Music backgroundMusic;
@@ -39,12 +40,12 @@ int main() {
     InitAudioDevice();
 
     // Load and loop background music
-    backgroundMusic = LoadMusicStream("../assets/backgroundSond.mp3");
+    backgroundMusic = LoadMusicStream(ASSET_PATH("backgroundSond.mp3"));
     PlayMusicStream(backgroundMusic);
 
     // Instantiate player
     Player player;
-    player.texture = LoadTexture("../assets/player.png");
+    player.texture = LoadTexture(ASSET_PATH("player.png"));
 
     // Setup levels detail
     LevelManager level(SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_Y);
