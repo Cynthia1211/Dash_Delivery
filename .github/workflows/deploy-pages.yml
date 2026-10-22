@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Emscripten
-        uses: ilammy/setup-emsdk@v1
+        uses: emscripten-core/setup-emsdk@v16
 
       - name: Check out raylib
         uses: actions/checkout@v4
